@@ -412,6 +412,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _healthBar: {fileID: 7625229936010566297}
+  mockData: {fileID: 11400000, guid: 61718fe300c559c40a3e7c47d7b74feb, type: 2}
 --- !u!1 &8844510190094917880
 GameObject:
   m_ObjectHideFlags: 0

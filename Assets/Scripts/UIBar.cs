@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HealthBar : MonoBehaviour
+public class UIBar : MonoBehaviour
 {
   [SerializeField]
   private Slider _slider = null;
-  private int _max = 0;
-  public void Setup(int maxValue)
+  private float _max = 0;
+  public void Setup(float maxValue)
   {
     _max = maxValue;
+    gameObject.SetActive(false);
   }
 
-  public void UpdateBar(int value)
+  public void UpdateBar(float value)
   {
-    float barVal = (float)value / (float)_max;
+    float barVal = value / _max;
     _slider.value = barVal;
   }
 }
