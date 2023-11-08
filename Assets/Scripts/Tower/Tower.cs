@@ -11,9 +11,14 @@ public class Tower : MonoBehaviour
 
   [SerializeField]
   private UIBar _attackCooldownBar = null;
+  [SerializeField]
+  private EnemyDetector _enemyDetector = null;
   private EnemyContainer _enemyContainer = null;
 
-  public Enemy _enemy = null;
+  public Enemy[] enemies = null;
+  public Tower otherTower = null;
+
+  private TowerConnector _towerConnector = null;
 
   private void SubscribeOnAttack(Action action)
   {
@@ -36,22 +41,34 @@ public class Tower : MonoBehaviour
   private void Start()
   {
     _enemyContainer = new EnemyContainer(5);
+    _towerConnector = new TowerConnector(this, 2);
 
     if (_attackCooldownBar) _attackCooldownBar.Setup(_attackInterval);
     SubscribeOnAttack(() => ShowAttackCooldownBar(_attackInterval));
 
     _attackCooldownBar.gameObject.SetActive(false);
+
+    if (_enemyDetector) _enemyDetector.Setup(_enemyContainer);
   }
 
   private void Update()
   {
     if(Input.GetKeyDown(KeyCode.Space))
     {
-      if (_enemy) _enemyContainer.AddEnemyToList(_enemy);
+      if (enemies != null)
+      {
+        foreach (var e in enemies)
+        {
+          _enemyContainer.AddEnemyToList(e);
+        }
+      }
     }
-    else if(Input.GetKeyDown(KeyCode.LeftShift)) 
+    else if(Input.GetKeyDown(KeyCode.C))
     {
-      if (_enemy) _enemyContainer.RemoveEnemyFromList(_enemy);
+      if(otherTower)
+      {
+        Connect(otherTower);
+      }
     }
 
     Attack();
@@ -92,5 +109,21 @@ public class Tower : MonoBehaviour
     }
     _attackCooldownBar.gameObject.SetActive(false);
     _canAttack = true;
+  }
+
+  public void Connect(Tower other)
+  {
+    if(_towerConnector.Connect(other))
+    {
+      TowerPair.PairTower(this, other);
+    }
+  }
+
+  public void Disconnect(Tower other)
+  {
+    if(_towerConnector.Disconnect(other))
+    {
+      TowerPair.UnPairTower(this, other);
+    }
   }
 }

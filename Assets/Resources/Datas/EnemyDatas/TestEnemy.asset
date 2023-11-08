@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b8aa8ec3dad038498393d366c141a1f, type: 3}
   m_Name: TestEnemy
   m_EditorClassIdentifier: 
-  lifeTime: 30
+  lifeTime: 100
   maxHealth: 15

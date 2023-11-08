@@ -158,14 +158,11 @@ public class Enemy : MonoBehaviour
   {
     _currentHealth = Math.Clamp(_currentHealth + updateAmount, 0, _maxHealth);
     _onHealthUpdated?.Invoke(_currentHealth);
-
-    Debug.Log(name + "current health: " + _currentHealth);
     if (_currentHealth <= 0) Die();
   }
 
   private void Die()
   {
-    Debug.Log($"{name} die.");
     _onDie?.Invoke();
     Destroy();
   }
