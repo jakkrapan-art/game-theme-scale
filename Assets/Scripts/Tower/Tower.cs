@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Tower : MonoBehaviour
 {
+  private Stat _attackDamage;
   private float _attackInterval = 1.2f;
   private bool _canAttack = true;
   private Action _onAttack;
@@ -42,6 +43,7 @@ public class Tower : MonoBehaviour
   {
     _enemyContainer = new EnemyContainer(5);
     _towerConnector = new TowerConnector(this, 2);
+    _attackDamage = new Stat(3);
 
     if (_attackCooldownBar) _attackCooldownBar.Setup(_attackInterval);
     SubscribeOnAttack(() => ShowAttackCooldownBar(_attackInterval));
@@ -87,7 +89,7 @@ public class Tower : MonoBehaviour
     var target = _enemyContainer.GetTargetEnemy();
     if (!target) return;
 
-    target.TakeDamage(1);
+    target.TakeDamage(_attackDamage.GetValue());
     _canAttack = false;
     _onAttack?.Invoke();
   }

@@ -7,11 +7,45 @@ using UnityEngine;
 public class Stat
 {
   [SerializeField]
-  private int value = 10;
-  public Stat(int value)
+  private int baseValue = 10;
+  private Dictionary<Tower, List<int>> buffDict;
+
+  public Stat(int baseValue)
   {
-    this.value = value;
+    this.baseValue = baseValue;
+    buffDict = new Dictionary<Tower, List<int>>();
   }
 
-  public int GetValue() => value;
+  public void AddModifier(Tower buffer, int newBuff)
+  {
+    if(buffDict.TryGetValue(buffer, out List<int> buffList))
+    {
+      buffList.Add(newBuff);
+    }
+    else
+    {
+      buffDict.Add(buffer, new List<int>(newBuff));
+    }
+  }
+
+  public void RemoveModifier(Tower buffer) 
+  {
+    if (!buffDict.ContainsKey(buffer)) return;
+
+    buffDict.Remove(buffer);
+  }
+
+  public int GetValue() 
+  {
+    int totalVal = baseValue;
+    foreach (var modifyList in buffDict.Values)
+    {
+      foreach (var value in modifyList)
+      {
+        totalVal += value;
+      }
+    }
+
+    return totalVal;
+  }
 }
