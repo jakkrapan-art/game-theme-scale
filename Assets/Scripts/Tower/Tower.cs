@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Tower : MonoBehaviour
+public class Tower : MonoBehaviour, ISelectableObject
 {
   private Stat _attackDamage;
   private float _attackInterval = 1.2f;
   private bool _canAttack = true;
   private Action _onAttack;
+
+  private bool _isSelecting = false;
 
   [SerializeField]
   private UIBar _attackCooldownBar = null;
@@ -53,6 +55,12 @@ public class Tower : MonoBehaviour
     if (_enemyDetector) _enemyDetector.Setup(_enemyContainer);
   }
 
+  private void OnMouseDown()
+  {
+    var cursor = Cursor.GetInstance();
+    cursor.SelectObect(this);
+  }
+
   private void Update()
   {
     if(Input.GetKeyDown(KeyCode.Space))
@@ -61,6 +69,7 @@ public class Tower : MonoBehaviour
       {
         foreach (var e in enemies)
         {
+          Debug.Log("container:" + _enemyContainer);
           _enemyContainer.AddEnemyToList(e);
         }
       }
@@ -73,6 +82,7 @@ public class Tower : MonoBehaviour
       }
     }
 
+    MoveToMouse();
     Attack();
   }
 
@@ -127,5 +137,24 @@ public class Tower : MonoBehaviour
     {
       TowerPair.UnPairTower(this, other);
     }
+  }
+
+  public void Select()
+  {
+    _isSelecting = true;
+  }
+
+  public void Deselect()
+  {
+    _isSelecting = false;
+  }
+
+  private void MoveToMouse()
+  {
+    if (!_isSelecting) return;
+
+    var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    var newPos = new Vector3(mousePos.x, mousePos.y, transform.position.z);
+    transform.position = newPos;
   }
 }
