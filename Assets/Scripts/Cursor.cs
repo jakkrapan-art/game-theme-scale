@@ -24,7 +24,9 @@ public class Cursor : MonoBehaviour
 
   }
 
-  public void SelectObect(ISelectableObject selectableObject)
+  public ISelectableObject GetCurrentSelecting() => _selectingObj;
+
+  public void SelectObject(ISelectableObject selectableObject)
   {
     if(_selectingObj != null)
     {
@@ -38,5 +40,19 @@ public class Cursor : MonoBehaviour
 
     _selectingObj = selectableObject;
     _selectingObj.Select();
+  }
+
+  public void DoSelectingAction()
+  {
+    if (_selectingObj == null) return;
+
+    switch(_selectingObj)
+    {
+      case Tower tower:
+        _selectingObj = tower.Place();
+        break;
+      default:
+        break;
+    }
   }
 }

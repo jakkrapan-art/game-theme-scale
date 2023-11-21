@@ -2,33 +2,57 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyDetector : MonoBehaviour
+public class EnemyDetector
 {
-  private EnemyContainer _enemyContainer = null;
-  [SerializeField]
   private LineRenderer _lineRenderer = default;
 
-  public void Setup(EnemyContainer enemyContainer)
-  {
-    _enemyContainer = enemyContainer;
-  }
+  private float _findRadius = 0;
+  private Tower _tower = default;
+  private Enemy _target = default;
 
-  public void Update()
+  public EnemyDetector(Tower tower, float radius)
   {
-    DrawLineToTarget();
+    _tower = tower;
+    _findRadius = radius;
+
+    if(tower)
+    {
+      GameObject detectorGo = tower.transform.Find("EnemyDetector")?.gameObject;
+      if (detectorGo) detectorGo.TryGetComponent(out _lineRenderer);
+    }
   }
 
   private void DrawLineToTarget()
   {
-    if (!_lineRenderer) return;
+    if (!_lineRenderer || !_lineRenderer.enabled || !_target) return;
     //clear line
     _lineRenderer.positionCount = 0;
-    if (_enemyContainer == null || (_enemyContainer != null && !_enemyContainer.GetTargetEnemy())) return;
-
-    Vector2 target = _enemyContainer.GetTargetEnemy().transform.position;
-
+    
     _lineRenderer.positionCount = 2;
-    _lineRenderer.SetPosition(0, transform.position);
-    _lineRenderer.SetPosition(1, target);
+    _lineRenderer.SetPosition(0, _tower.transform.position);
+    _lineRenderer.SetPosition(1, _target.transform.position);
+  }
+
+  public void Search()
+  {
+    if (_target) return;
+
+    var hit = Physics2D.OverlapCircle(_tower.transform.position, _findRadius);
+    if (!hit || !hit.gameObject.TryGetComponent(out Enemy e))
+    {
+      _target = null;
+      return;
+    }
+
+    _target = e;
+    _target.SubscribeOnDie(() =>
+    {
+      _target = null;
+    });
+  }
+
+  public void SetEnableLine(bool enable)
+  {
+    _lineRenderer.enabled = enable;
   }
 }

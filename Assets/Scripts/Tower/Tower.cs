@@ -23,6 +23,13 @@ public class Tower : MonoBehaviour, ISelectableObject
 
   private TowerConnector _towerConnector = null;
 
+  [SerializeField]
+  private PlaceableDisplay _placeableDisplay = default;
+  private bool _canPlace = true;
+
+  [SerializeField]
+  private SpriteRenderer _spriteRenderer = default;
+
   private void SubscribeOnAttack(Action action)
   {
     _onAttack += action;
@@ -52,13 +59,21 @@ public class Tower : MonoBehaviour, ISelectableObject
 
     _attackCooldownBar.gameObject.SetActive(false);
 
-    if (_enemyDetector) _enemyDetector.Setup(_enemyContainer);
+    _enemyDetector = new EnemyDetector(this, 4);
   }
 
   private void OnMouseDown()
   {
     var cursor = Cursor.GetInstance();
-    cursor.SelectObect(this);
+    var currentSelecting = cursor.GetCurrentSelecting();
+    if (currentSelecting != null && currentSelecting.Equals(this))
+    {
+      cursor.DoSelectingAction();
+    }
+    else
+    {
+      cursor.SelectObject(this);
+    }
   }
 
   private void Update()
@@ -81,9 +96,14 @@ public class Tower : MonoBehaviour, ISelectableObject
         Connect(otherTower);
       }
     }
+    else if(Input.GetKeyDown(KeyCode.V))
+    {
+      UpdateSize(UnityEngine.Random.Range(1, 5));
+    }
 
     MoveToMouse();
     Attack();
+    UpdateCanPlace();
   }
 
   private void OnDestroy()
@@ -142,11 +162,14 @@ public class Tower : MonoBehaviour, ISelectableObject
   public void Select()
   {
     _isSelecting = true;
+    if (_spriteRenderer) _spriteRenderer.sortingOrder += 1;
+    transform.SetAsLastSibling();
   }
 
   public void Deselect()
   {
     _isSelecting = false;
+    if (_spriteRenderer) _spriteRenderer.sortingOrder -= 1;
   }
 
   private void MoveToMouse()
@@ -154,7 +177,60 @@ public class Tower : MonoBehaviour, ISelectableObject
     if (!_isSelecting) return;
 
     var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-    var newPos = new Vector3(mousePos.x, mousePos.y, transform.position.z);
+    var newPos = new Vector3(Mathf.Floor(mousePos.x), Mathf.Floor(mousePos.y), transform.position.z) + new Vector3(transform.localScale.x / 2, + transform.localScale.y/2);
     transform.position = newPos;
+  }
+
+  public Tower Place()
+  {
+    if(_canPlace)
+    {
+      Deselect();
+      return null;
+    }
+
+    return this;
+  }
+
+  private void UpdateCanPlace()
+  {
+    if (!_placeableDisplay) return;
+
+    if (!_isSelecting)
+    {
+      _placeableDisplay.SetDisplay(PlaceableDisplay.DisplayType.Hide);
+      return;
+    }
+
+    _canPlace = IsCanPlace();
+
+    if (_canPlace)
+    {
+      _placeableDisplay.SetDisplay(PlaceableDisplay.DisplayType.Placeable);
+    }
+    else
+    {
+      _placeableDisplay.SetDisplay(PlaceableDisplay.DisplayType.NonPlaceable);
+    }
+  }
+
+  private bool IsCanPlace()
+  {
+    ContactFilter2D filter = new ContactFilter2D();
+    Collider2D[] hits = new Collider2D[1];
+    int hitCount = Physics2D.OverlapCollider(GetComponent<Collider2D>(), filter, hits);
+
+    if(hitCount == 0) return true;
+    foreach (var hit in hits)
+    {
+      if (hit.gameObject.GetComponent<Tower>()) return false;
+    }
+
+    return false;
+  }
+
+  public void UpdateSize(float size)
+  {
+    transform.localScale = new Vector3(size, size, 1);
   }
 }
