@@ -10,7 +10,7 @@ public class Tower : MonoBehaviour, ISelectableObject
   private bool _canAttack = true;
   private Action _onAttack;
 
-  private bool _isSelecting = false;
+  private bool _isMoving = false;
 
   [SerializeField]
   private UIBar _attackCooldownBar = null;
@@ -161,23 +161,23 @@ public class Tower : MonoBehaviour, ISelectableObject
 
   public void Select()
   {
-    _isSelecting = true;
+    _isMoving = true;
     if (_spriteRenderer) _spriteRenderer.sortingOrder += 1;
     transform.SetAsLastSibling();
   }
 
   public void Deselect()
   {
-    _isSelecting = false;
+    _isMoving = false;
     if (_spriteRenderer) _spriteRenderer.sortingOrder -= 1;
   }
 
   private void MoveToMouse()
   {
-    if (!_isSelecting) return;
+    if (!_isMoving) return;
 
     var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-    var newPos = new Vector3(Mathf.Floor(mousePos.x), Mathf.Floor(mousePos.y), transform.position.z) + new Vector3(transform.localScale.x / 2, + transform.localScale.y/2);
+    var newPos = new Vector3(Mathf.Floor(mousePos.x), Mathf.Floor(mousePos.y), transform.position.z) + new Vector3(0.5f, 0.5f);
     transform.position = newPos;
   }
 
@@ -196,7 +196,7 @@ public class Tower : MonoBehaviour, ISelectableObject
   {
     if (!_placeableDisplay) return;
 
-    if (!_isSelecting)
+    if (!_isMoving)
     {
       _placeableDisplay.SetDisplay(PlaceableDisplay.DisplayType.Hide);
       return;

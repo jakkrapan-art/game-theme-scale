@@ -22,6 +22,9 @@ public class Enemy : MonoBehaviour
   private bool _isMoving;
 
   public EnemyData mockData;
+  [SerializeField]
+  private LineRenderer _movePath = null;
+  private int _currentTargetMoveIndex = 0;
 
   #region Getter
   public EnemyTag GetTag() => _tag;
@@ -96,16 +99,13 @@ public class Enemy : MonoBehaviour
   private void Start()
   {
     if(mockData) Setup(mockData);
+
+    if (_movePath) SetMoveTarget(_movePath.GetPosition(_currentTargetMoveIndex));
   }
 
   private void Update()
   {
     CheckLifetime();
-
-    if(Input.GetKeyDown(KeyCode.M))
-    {
-      SetMoveTarget(new Vector2(UnityEngine.Random.Range(0,10), UnityEngine.Random.Range(0,5)));
-    }
   }
 
   private void FixedUpdate()
@@ -128,6 +128,18 @@ public class Enemy : MonoBehaviour
 
     if (_healthBar) _healthBar.Setup(_maxHealth);
     SubscribeOnHealthUpdated(UpdateHealthBar);
+
+    SubscribeOnMoveFinish(() => 
+    {
+      if(_currentTargetMoveIndex >= _movePath.positionCount - 1)
+      {
+        _isMoving = false;
+        return;
+      }
+
+      ++_currentTargetMoveIndex;
+      SetMoveTarget(_movePath.GetPosition(_currentTargetMoveIndex));
+    });
   }
 
   private void Cleanup()
@@ -188,11 +200,10 @@ public class Enemy : MonoBehaviour
   {
     if (!_isMoving) return;
 
-    transform.position = Vector2.MoveTowards(transform.position, _moveTarget, 0.12f);
+    transform.position = Vector2.MoveTowards(transform.position, _moveTarget, 2 * Time.fixedDeltaTime);
 
     if(Mathf.Approximately(Vector2.Distance(transform.position, _moveTarget), 0))
     {
-      _isMoving = false;
       _onMoveFinish?.Invoke();
     }
   }
