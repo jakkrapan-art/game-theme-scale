@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa750f1214069eb4b8ed6f5111b1f9d6, type: 3}
+  m_Name: Map_3
+  m_EditorClassIdentifier: 
+  mapSize: {x: 18, y: 10}
+  startPoint: {x: 9, y: 0, z: 0}
+  pathDir:
+  - direction: 0
+    n: 2
+  - direction: 2
+    n: 10
+  - direction: 0
+    n: 2
+  - direction: 3
+    n: 20
+  - direction: 0
+    n: 2
+  - direction: 2
+    n: 20
+  - direction: 0
+    n: 10
+  possibleEnemies:
+  - {fileID: 7369738440528948488, guid: eab2bcab9bc947e4d9ece1f23e1e20ca, type: 3}

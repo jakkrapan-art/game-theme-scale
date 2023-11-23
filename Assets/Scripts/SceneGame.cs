@@ -5,14 +5,25 @@ using UnityEngine;
 public class SceneGame : MonoBehaviour
 {
   [SerializeField]
-  private Map map = default;
+  private Map _map = default;
+
+  private EnemySpawner _enemySpawner = default;
+
   void Start()
   {
     GridHelper.Initialize();
 
-    if (map)
+    if (_map)
     {
-      map.Setup(new Vector2Int(18, 10), new Vector3Int(0, 4), new Vector3Int(0, -5), 10);
+      _map.Setup();
+      _enemySpawner = _map.GetEnemySpawner();
     }
+
+    StartGame();
+  }
+
+  private void StartGame()
+  {
+    _enemySpawner.Spawn(20, 2f);
   }
 }

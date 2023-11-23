@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.WSA;
@@ -13,41 +14,97 @@ public class Map : MonoBehaviour
   [SerializeField]
   private TileBase _pathTile;
 
-  private Vector2 _mapSize = new Vector2(18, 10);
-  private Vector3Int _startPoint = default;
-  private Vector3Int _endPoint = default;
-  private Vector3Int _path = default;
+  [SerializeField]
+  private List<Vector3Int> _path = default;
 
-  public void Setup(Vector2Int mapSize, Vector3Int startPoint, Vector3Int endPoint, int pathTileCount)
+  [SerializeField]
+  private MapPattern _mapPattern;
+
+  [SerializeField]
+  private Vector3Int _endPoint;
+
+  private EnemySpawner _enemySpawner;
+
+  private readonly string _enemySpawnerTemplatePath = "Templates/EnemySpawner";
+
+  public void Setup()
   {
-    _startPoint = startPoint;
-    _endPoint = endPoint;
-    _mapSize = mapSize;
+    _path.Clear();
 
-    DrawPath(pathTileCount);
+    InitialMap();
+    DrawPath();
+
+    Camera.main.transform.position = new Vector3(_mapPattern.mapSize.x / 2, _mapPattern.mapSize.y / 2, Camera.main.transform.position.z);
+
+    CreateEnemySpawner();
   }
 
-  private void DrawPath(int tileCount)
+  private void InitialMap()
   {
-    for (int x = -Mathf.FloorToInt(_mapSize.x/2); x < _mapSize.x/2; x++)
+    for (int x = 0; x < _mapPattern.mapSize.x; x++)
     {
-      for (int y = -Mathf.FloorToInt(_mapSize.y / 2); y < _mapSize.y/2; y++)
+      for (int y = 0; y < _mapPattern.mapSize.y; y++)
       {
-        var cell = new Vector3Int(x, y);
-        if ((x == _startPoint.x && y == _startPoint.y) || (x == _endPoint.x && y == _endPoint.y)) continue;
-        
-        GridHelper.SetTile(_dirtTile, cell);
+        GridHelper.SetTile(_dirtTile, new Vector3Int(x, y));
+      }
+    }
+  }
+
+  #region Getter
+  public List<Vector3Int> GetPath() => _path;
+  public Vector3Int GetStartPoint() => _mapPattern.startPoint;
+  public EnemySpawner GetEnemySpawner() => _enemySpawner;
+  #endregion
+
+  private void DrawPath()
+  {
+    SetPathTile(_mapPattern.startPoint);
+
+    var drawPathData = _mapPattern.pathDir;
+
+    Vector3Int currentPoint = _mapPattern.startPoint;
+
+    foreach (var d in drawPathData)
+    {
+      for (int i = 0; i < d.n; i++)
+      {
+        if (currentPoint.x < 0 || currentPoint.x >= _mapPattern.mapSize.x || currentPoint.y < 0 || currentPoint.y >= _mapPattern.mapSize.y) break;
+
+        SetPathTile(currentPoint);
+        _path.Add(currentPoint);
+        switch (d.direction)
+        {
+          case Direction.Up:
+            currentPoint += new Vector3Int(0, 1);
+            break;
+          case Direction.Down:
+            currentPoint -= new Vector3Int(0, 1);
+            break;
+          case Direction.Left:
+            currentPoint -= new Vector3Int(1, 0);
+            break;
+          case Direction.Right:
+            currentPoint += new Vector3Int(1, 0);
+            break;
+        }
+
+        currentPoint.x = (int)Mathf.Clamp(currentPoint.x, 0, _mapPattern.mapSize.x - 1);
+        currentPoint.y = (int)Mathf.Clamp(currentPoint.y, 0, _mapPattern.mapSize.y - 1);
       }
     }
 
-    SetPathTile(_startPoint);
-    SetPathTile(_endPoint);
+    _endPoint = currentPoint;
   }
 
   private void SetPathTile(Vector3Int cell)
   {
     GridHelper.SetTile(_pathTile, cell);
-    Debug.Log("cell y: " + cell.y + " map y: " + _mapSize.y / 2);
-    if(cell.y + 1 < _mapSize.y / 2) GridHelper.SetTile(_dirtBorderTile, cell + new Vector3Int(0, 1));
+  }
+
+  private void CreateEnemySpawner()
+  {
+    var point = _mapPattern.startPoint;
+    _enemySpawner = Instantiate(Resources.Load<EnemySpawner>(_enemySpawnerTemplatePath));
+    _enemySpawner.Setup(_mapPattern.possibleEnemies, point, _path, EnemySpawner.SpawnType.Fix);
   }
 }

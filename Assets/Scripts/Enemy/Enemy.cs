@@ -22,8 +22,8 @@ public class Enemy : MonoBehaviour
   private bool _isMoving;
 
   public EnemyData mockData;
-  [SerializeField]
-  private LineRenderer _movePath = null;
+
+  private List<Vector3Int> _movePath = new List<Vector3Int>();
   private int _currentTargetMoveIndex = 0;
 
   #region Getter
@@ -99,8 +99,6 @@ public class Enemy : MonoBehaviour
   private void Start()
   {
     if(mockData) Setup(mockData);
-
-    if (_movePath) SetMoveTarget(_movePath.GetPosition(_currentTargetMoveIndex));
   }
 
   private void Update()
@@ -131,14 +129,15 @@ public class Enemy : MonoBehaviour
 
     SubscribeOnMoveFinish(() => 
     {
-      if(_currentTargetMoveIndex >= _movePath.positionCount - 1)
+      if(_currentTargetMoveIndex >= _movePath.Count - 1)
       {
         _isMoving = false;
+        Destroy(gameObject);
         return;
       }
 
       ++_currentTargetMoveIndex;
-      SetMoveTarget(_movePath.GetPosition(_currentTargetMoveIndex));
+      SetMoveTarget(GridHelper.CellToWorld(_movePath[_currentTargetMoveIndex]));
     });
   }
 
@@ -190,9 +189,16 @@ public class Enemy : MonoBehaviour
     Destroy(gameObject);
   }
 
+  public void SetMovePath(List<Vector3Int> path)
+  {
+    _movePath = path;
+    if (_movePath.Count <= 0) return;
+    SetMoveTarget(GridHelper.CellToWorld(_movePath[0]));
+  }
+
   public void SetMoveTarget(Vector2 targetPosition)
   {
-    _moveTarget = targetPosition;
+    _moveTarget = targetPosition + new Vector2(transform.localScale.x/2, transform.localScale.y/2);
     _isMoving = true;
   }
 
