@@ -1,58 +1,62 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class EnemyDetector
 {
-  private LineRenderer _lineRenderer = default;
-
-  private float _findRadius = 0;
+  private float _radius = 0;
   private Tower _tower = default;
   private Enemy _target = default;
 
   public EnemyDetector(Tower tower, float radius)
   {
     _tower = tower;
-    _findRadius = radius;
-
-    if(tower)
-    {
-      GameObject detectorGo = tower.transform.Find("EnemyDetector")?.gameObject;
-      if (detectorGo) detectorGo.TryGetComponent(out _lineRenderer);
-    }
+    _radius = radius;
   }
 
-  private void DrawLineToTarget()
-  {
-    if (!_lineRenderer || !_lineRenderer.enabled || !_target) return;
-    //clear line
-    _lineRenderer.positionCount = 0;
-    
-    _lineRenderer.positionCount = 2;
-    _lineRenderer.SetPosition(0, _tower.transform.position);
-    _lineRenderer.SetPosition(1, _target.transform.position);
-  }
+  #region Getter
+  public Enemy GetTargetEnemy() => _target;
+  public float GetRadius() => _radius;
+  #endregion
 
   public void Search()
   {
-    if (_target) return;
-
-    var hit = Physics2D.OverlapCircle(_tower.transform.position, _findRadius);
-    if (!hit || !hit.gameObject.TryGetComponent(out Enemy e))
+    if (_target)
     {
-      _target = null;
+      CheckDistanceBetweenTarget();
+      return;
+    }
+
+    var hit = Physics2D.OverlapCircle(_tower.transform.position, _radius);
+    if (!hit || !hit.gameObject.TryGetComponent(out Enemy e))
+    {      
+      ClearTarget();
       return;
     }
 
     _target = e;
     _target.SubscribeOnDie(() =>
     {
-      _target = null;
+      ClearTarget();
     });
   }
 
-  public void SetEnableLine(bool enable)
+  private void CheckDistanceBetweenTarget()
   {
-    _lineRenderer.enabled = enable;
+    if (_target == null) return;
+
+    var distance = Vector3.Distance(_tower.transform.position, _target.transform.position);
+    if (distance > _radius)
+    {
+      ClearTarget();
+    }
+  }
+
+  private void ClearTarget()
+  {
+    _target = null;
   }
 }

@@ -207,7 +207,6 @@ public class Enemy : MonoBehaviour
     if (!_isMoving) return;
 
     transform.position = Vector2.MoveTowards(transform.position, _moveTarget, 2 * Time.fixedDeltaTime);
-
     if(Mathf.Approximately(Vector2.Distance(transform.position, _moveTarget), 0))
     {
       _onMoveFinish?.Invoke();

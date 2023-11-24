@@ -16,11 +16,6 @@ public class Tower : MonoBehaviour, ISelectableObject
   private UIBar _attackCooldownBar = null;
   [SerializeField]
   private EnemyDetector _enemyDetector = null;
-  private EnemyContainer _enemyContainer = null;
-
-  public Enemy[] enemies = null;
-  public Tower otherTower = null;
-
   private TowerConnector _towerConnector = null;
 
   [SerializeField]
@@ -50,7 +45,6 @@ public class Tower : MonoBehaviour, ISelectableObject
   #region Unity Functions
   private void Start()
   {
-    _enemyContainer = new EnemyContainer(5);
     _towerConnector = new TowerConnector(this, 2);
     _attackDamage = new Stat(3);
 
@@ -59,7 +53,7 @@ public class Tower : MonoBehaviour, ISelectableObject
 
     _attackCooldownBar.gameObject.SetActive(false);
 
-    _enemyDetector = new EnemyDetector(this, 4);
+    _enemyDetector = new EnemyDetector(this, 1.5f);
   }
 
   private void OnMouseDown()
@@ -78,25 +72,7 @@ public class Tower : MonoBehaviour, ISelectableObject
 
   private void Update()
   {
-    if(Input.GetKeyDown(KeyCode.Space))
-    {
-      if (enemies != null)
-      {
-        foreach (var e in enemies)
-        {
-          Debug.Log("container:" + _enemyContainer);
-          _enemyContainer.AddEnemyToList(e);
-        }
-      }
-    }
-    else if(Input.GetKeyDown(KeyCode.C))
-    {
-      if(otherTower)
-      {
-        Connect(otherTower);
-      }
-    }
-    else if(Input.GetKeyDown(KeyCode.V))
+    if(Input.GetKeyDown(KeyCode.V))
     {
       UpdateSize(UnityEngine.Random.Range(1, 5));
     }
@@ -104,6 +80,7 @@ public class Tower : MonoBehaviour, ISelectableObject
     MoveToMouse();
     Attack();
     UpdateCanPlace();
+    if(_enemyDetector != null) _enemyDetector.Search();
   }
 
   private void OnDestroy()
@@ -114,9 +91,9 @@ public class Tower : MonoBehaviour, ISelectableObject
 
   private void Attack()
   {
-    if (!_canAttack || _enemyContainer == null) return;
+    if (!_canAttack || _enemyDetector == null) return;
 
-    var target = _enemyContainer.GetTargetEnemy();
+    var target = _enemyDetector.GetTargetEnemy();
     if (!target) return;
 
     target.TakeDamage(_attackDamage.GetValue());
@@ -232,5 +209,25 @@ public class Tower : MonoBehaviour, ISelectableObject
   public void UpdateSize(float size)
   {
     transform.localScale = new Vector3(size, size, 1);
+  }
+
+  private void OnDrawGizmos()
+  {
+    Gizmos.color = new Color32(255, 255, 0,70);
+    if (_enemyDetector != null)
+    {
+      Gizmos.DrawSphere(transform.position, _enemyDetector.GetRadius());
+
+      var target = _enemyDetector.GetTargetEnemy();
+      if (target)
+      {
+        var distance = Vector3.Distance(transform.position, target.transform.position);
+        if (distance <= _enemyDetector.GetRadius())
+          Gizmos.color = Color.green;
+        else
+          Gizmos.color = Color.red;
+        Gizmos.DrawLine(transform.position, target.transform.position);
+      }
+    }
   }
 }
