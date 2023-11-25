@@ -7,6 +7,7 @@ public class Inventory
   private TowerContainer towerContainer;
 
   #region Getter
+  public List<Tower> GetTowers() => towerContainer.GetTowers();
   #endregion
   #region Setter
   #endregion
