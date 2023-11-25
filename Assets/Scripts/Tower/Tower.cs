@@ -5,8 +5,10 @@ using UnityEngine;
 
 public class Tower : MonoBehaviour, ISelectableObject
 {
+  [SerializeField]
+  private TowerData _towerData;
+
   private Stat _attackDamage;
-  private float _attackInterval = 1.2f;
   private bool _canAttack = true;
   private Action _onAttack;
 
@@ -24,6 +26,10 @@ public class Tower : MonoBehaviour, ISelectableObject
 
   [SerializeField]
   private SpriteRenderer _spriteRenderer = default;
+  [SerializeField]
+  private Projectile _bullet = default;
+  [SerializeField]
+  private Transform _firePoint = default;
 
   private void SubscribeOnAttack(Action action)
   {
@@ -37,7 +43,7 @@ public class Tower : MonoBehaviour, ISelectableObject
 
   private void Cleanup()
   {
-    UnsubscribeOnAttack(() => ShowAttackCooldownBar(_attackInterval));
+    UnsubscribeOnAttack(() => ShowAttackCooldownBar());
 
     _onAttack = null;
   }
@@ -48,8 +54,8 @@ public class Tower : MonoBehaviour, ISelectableObject
     _towerConnector = new TowerConnector(this, 2);
     _attackDamage = new Stat(3);
 
-    if (_attackCooldownBar) _attackCooldownBar.Setup(_attackInterval);
-    SubscribeOnAttack(() => ShowAttackCooldownBar(_attackInterval));
+    if (_attackCooldownBar) _attackCooldownBar.Setup(_towerData.attackDamage);
+    SubscribeOnAttack(() => ShowAttackCooldownBar());
 
     _attackCooldownBar.gameObject.SetActive(false);
 
@@ -80,7 +86,7 @@ public class Tower : MonoBehaviour, ISelectableObject
     MoveToMouse();
     Attack();
     UpdateCanPlace();
-    if(_enemyDetector != null) _enemyDetector.Search();
+    _enemyDetector?.Search();
   }
 
   private void OnDestroy()
@@ -96,15 +102,29 @@ public class Tower : MonoBehaviour, ISelectableObject
     var target = _enemyDetector.GetTargetEnemy();
     if (!target) return;
 
-    target.TakeDamage(_attackDamage.GetValue());
     _canAttack = false;
     _onAttack?.Invoke();
+    SpawnBullet(target);
   }
 
-  private void ShowAttackCooldownBar(float second)
+  private void SpawnBullet(Enemy target)
+  {
+    if (!_bullet) return;
+    var spawnPos = _firePoint ? _firePoint.position : transform.position;
+
+    var bullet = Instantiate(_bullet, spawnPos, Quaternion.identity);
+    bullet.Setup(new Projectile.ProjectileData 
+    {
+      target= target,
+      damage = _attackDamage.GetValue(),
+      flySpeed = 5f
+    });
+  }
+
+  private void ShowAttackCooldownBar()
   {
     if (!_attackCooldownBar) return;
-    StartCoroutine(DoShowAttackCooldownBar(second));
+    StartCoroutine(DoShowAttackCooldownBar(_towerData.attackInterval));
   }
 
   private IEnumerator DoShowAttackCooldownBar(float second)

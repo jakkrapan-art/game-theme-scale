@@ -301,11 +301,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acc1eb010f0e06d46a6a1c88e1c84484, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _towerData: {fileID: 11400000, guid: a162842f8bfefe242a5574c198fd20c0, type: 2}
   _attackCooldownBar: {fileID: 5393234544369296956}
-  enemies: []
-  otherTower: {fileID: 0}
   _placeableDisplay: {fileID: 2837965190056494688}
   _spriteRenderer: {fileID: 2686306235956353135}
+  _bullet: {fileID: 3663078312742367530, guid: 8d556b94ae8eb3a489b318a94abed71c, type: 3}
+  _firePoint: {fileID: 0}
 --- !u!120 &3601685194233135288
 LineRenderer:
   m_ObjectHideFlags: 0
