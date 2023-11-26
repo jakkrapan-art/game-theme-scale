@@ -9,7 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: e62ff04bc3ac4d644857b5e8046e42d8, type: 3}
   m_Name: EnemyFoodList
   m_EditorClassIdentifier: Assembly-CSharp::EnemyFoodList
-  splashes: []
+  splashes:
+  - {fileID: -4357919902615936077, guid: 0f3e7804ce95ae247bb6dfed470a37f8, type: 3}
+  - {fileID: -2368089305704126603, guid: ef742a10b23ebb749a32fc637cfa1613, type: 3}
+  - {fileID: -3755118370957059475, guid: 8e8dbcfc1b7603e47ac7c585afbb2947, type: 3}
+  - {fileID: -8790444146224221718, guid: 33a5214c63458ab428fd9b0f1b3cdf2d, type: 3}
+  - {fileID: 9104597289141483727, guid: a68e6dab026760c4c81c93ff61bee13f, type: 3}
+  - {fileID: -4635373180865272425, guid: f182375101d8d7e499254fb8ab9cd3bb, type: 3}

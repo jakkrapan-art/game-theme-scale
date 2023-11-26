@@ -115,7 +115,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _healthBar: {fileID: 5085991956943194290}
-  mockData: {fileID: 11400000, guid: a3f951eaa3c9b4a45b6e7bf4d4057a9a, type: 2}
+  data: {fileID: 11400000, guid: a3f951eaa3c9b4a45b6e7bf4d4057a9a, type: 2}
   _foodLayerMask:
     serializedVersion: 2
     m_Bits: 1

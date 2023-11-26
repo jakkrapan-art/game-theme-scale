@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum EnemyTag
@@ -13,14 +14,17 @@ public class Enemy : MonoBehaviour
 {
   private int _maxHealth = 10;
   private int _currentHealth;
+  private float _moveSpeed = 2f;
   private EnemyTag _tag = EnemyTag.Normal;
   [SerializeField] private UIBar _healthBar;
   private int _queueOrder = -1;
 
   private Vector2 _moveTarget;
   private bool _isMoving;
+  private bool _updatingSclae = false;
 
-  public EnemyData mockData;
+  [SerializeField]
+  private EnemyData data;
 
   private List<Vector3Int> _movePath = new List<Vector3Int>();
   private int _currentTargetMoveIndex = 0;
@@ -108,7 +112,7 @@ public class Enemy : MonoBehaviour
   #region Unity Functions
   protected virtual void Start()
   {
-    if(mockData) Setup(mockData);
+    if(data) Setup(data);
   }
 
   private void Update()
@@ -127,12 +131,16 @@ public class Enemy : MonoBehaviour
   }
   #endregion
 
-  private void Setup(EnemyData data)
+  protected virtual void Setup(EnemyData data)
   {
     _maxHealth = data.maxHealth;
     _currentHealth = _maxHealth;
 
+    _moveSpeed = data.moveSpeed;
+    SetScale(data.scale);
+
     if (_healthBar) _healthBar.Setup(_maxHealth);
+
     SubscribeOnHealthUpdated(UpdateHealthBar);
 
     SubscribeOnMoveFinish(() => 
@@ -206,18 +214,44 @@ public class Enemy : MonoBehaviour
 
   public void SetMoveTarget(Vector2 targetPosition)
   {
-    _moveTarget = targetPosition + new Vector2(transform.localScale.x/2, transform.localScale.y/2);
+    _moveTarget = targetPosition + new Vector2(0.5f, 0.5f);
     _isMoving = true;
   }
 
   public void Move()
   {
-    if (!_isMoving) return;
+    if (!_isMoving || _updatingSclae) return;
 
-    transform.position = Vector2.MoveTowards(transform.position, _moveTarget, 2 * Time.fixedDeltaTime);
+    transform.position = Vector2.MoveTowards(transform.position, _moveTarget, _moveSpeed * Time.fixedDeltaTime);
     if(Mathf.Approximately(Vector2.Distance(transform.position, _moveTarget), 0))
     {
       _onMoveFinish?.Invoke();
     }
+  }
+
+  protected void SetScale(float scale, bool instant = true)
+  {
+    if(!instant)
+      StartCoroutine(DoUpdateScale(scale));
+    else
+      transform.localScale = new Vector3(scale, scale, 1);
+  }
+
+  private IEnumerator DoUpdateScale(float scale)
+  {
+    float time = 1.25f;
+    float startTime = Time.time;
+    float currentScale = transform.localScale.x;
+    _updatingSclae = true;
+
+    while(Time.time <= startTime + time)
+    {
+      currentScale = Mathf.Lerp(currentScale, scale, 0.14f);
+      transform.localScale = new Vector3(currentScale, currentScale, 1);
+      yield return new WaitForEndOfFrame();
+    }
+
+    transform.localScale = new Vector3(scale, scale, 1);
+    _updatingSclae = false;
   }
 }

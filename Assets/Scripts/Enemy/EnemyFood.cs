@@ -31,9 +31,3 @@ public class EnemyFood : MonoBehaviour
     return _foodValue;
   }
 }
-
-[CreateAssetMenu(fileName = "EnemyFoodList", menuName = "ScriptableObject/EnemyFoodList")]
-public class EnemyFoodList : ScriptableObject
-{
-  public List<EnemyFood> splashes = new List<EnemyFood>();
-}

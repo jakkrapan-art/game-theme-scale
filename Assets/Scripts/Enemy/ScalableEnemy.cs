@@ -10,11 +10,21 @@ public class ScalableEnemy : Enemy
   private int _maxFood = 20;
   private int _currenFood = 0;
 
+  private ScalableEnemyData _data;
+
   protected override void Start()
   {
     base.Start();
 
     SubscribeOnUpdateAction(SearchFood);
+  }
+
+  protected override void Setup(EnemyData data)
+  {
+    _data = data as ScalableEnemyData;
+    _maxFood = _data.maxFood;
+
+    base.Setup(data);
   }
 
   private void SearchFood()
@@ -36,12 +46,14 @@ public class ScalableEnemy : Enemy
   {
     _currenFood += amount;
 
-    if(_currenFood > _maxFood) 
+    if(_currenFood >= _maxFood) 
     {
       int increaseCount = Mathf.FloorToInt(_currenFood / _maxFood);
       for (int i = 0; i < increaseCount; i++)
       {
         //increase scale and stats
+        float scale = transform.localScale.x + _data.extraScale;
+        SetScale(scale, false);
       }
     }
 

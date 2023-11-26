@@ -9,7 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b8aa8ec3dad038498393d366c141a1f, type: 3}
-  m_Name: Boss_1
+  m_Script: {fileID: 11500000, guid: 2c46222e5cdc01346998d28069433090, type: 3}
+  m_Name: Scalable_1
   m_EditorClassIdentifier: 
-  maxHealth: 15
+  maxHealth: 100
+  moveSpeed: 0.7
+  scale: 0.3
+  maxFood: 5
+  extraScale: 0.6
