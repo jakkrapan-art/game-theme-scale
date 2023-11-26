@@ -9,31 +9,47 @@ public class Wallet
     Gold, Meat
   }
 
-  public interface CurrencyData
+  public struct SetupData
+  {
+    public List<CurrencyData> currencyDatas;
+  }
+
+  public struct CurrencyData
   {
     public CurrencyType Type { get; }
-    public int amount { get; }
+    public int Amount { get; }
+
+    public CurrencyData(CurrencyType type, int amount)
+    {
+      Type = type;
+      Amount = amount;
+    }
   }
 
   public Dictionary<CurrencyType, int> _currencies = new Dictionary<CurrencyType, int>();
 
-  public Wallet(List<CurrencyData> initialCurrencies)
+  public Wallet(SetupData setupData)
   {
-    foreach (var curr in initialCurrencies)
+    foreach (var curr in setupData.currencyDatas)
     {
       AddCurrency(curr);
     }
+  }
+
+  public int GetCurrency(CurrencyType type)
+  {
+    return _currencies[type];
   }
 
   public void AddCurrency(CurrencyData data)
   {
     if(_currencies.ContainsKey(data.Type))
     {
-      _currencies[data.Type] += data.amount;
+      _currencies[data.Type] += data.Amount;
     }
     else
     {
-      _currencies.Add(data.Type, data.amount);
+      _currencies.Add(data.Type, data.Amount);
     }
   }
 }

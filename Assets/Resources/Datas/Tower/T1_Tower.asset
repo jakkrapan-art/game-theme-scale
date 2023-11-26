@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   attackInterval: 0.6
   attackDamage: 5
-  projectileData: {fileID: 0}
+  projectileData: {fileID: 11400000, guid: b90c57176c8c8ae449affbbb7e5c98b1, type: 2}

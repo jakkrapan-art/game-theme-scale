@@ -10,6 +10,9 @@ public class EnemySpawner : MonoBehaviour
   private SpawnType _spawnType = default;
   public enum SpawnType { Random, Fix }
 
+  [SerializeField]
+  private ScalableEnemy _boss = default;
+
   public void Setup(List<Enemy> enemies, Vector3Int spawnPoint, List<Vector3Int> movePath, SpawnType spawnType = SpawnType.Fix)
   {
     _possibleEnemies = enemies;
@@ -42,10 +45,14 @@ public class EnemySpawner : MonoBehaviour
         if(!enemy) yield break;
       }
     }
+
+    SpawnEnemy(_boss);
   }
 
   private void SpawnEnemy(Enemy enemy) 
   {
+    if (!enemy) return;
+
     var spawned = Instantiate(enemy, _spawnPoint + new Vector3(enemy.transform.localScale.x/2, enemy.transform.localScale.y/2), Quaternion.identity);
     spawned.SetMovePath(_movePath);
   }

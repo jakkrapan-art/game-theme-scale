@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using UnityEngine;
 
 public enum EnemyTag
@@ -15,8 +16,6 @@ public class Enemy : MonoBehaviour
   private EnemyTag _tag = EnemyTag.Normal;
   [SerializeField] private UIBar _healthBar;
   private int _queueOrder = -1;
-  private float _lifeTime = 30;
-  private float _spawnTime = 0;
 
   private Vector2 _moveTarget;
   private bool _isMoving;
@@ -30,7 +29,6 @@ public class Enemy : MonoBehaviour
   public EnemyTag GetTag() => _tag;
   public int GetQueueOrder() => _queueOrder;
   public int GetCurrentHealth() => _currentHealth;
-  public float GetLifeTime() => _lifeTime;
   #endregion
 
   #region Setter
@@ -94,16 +92,28 @@ public class Enemy : MonoBehaviour
     _onMoveFinish -= action;
   }
   #endregion
+  #region OnUpdateAction
+  private Action _onUpdateAction = default;
+  protected void SubscribeOnUpdateAction(Action action)
+  {
+    _onUpdateAction += action;
+  }
+
+  protected void UnsubscribeOnUpdateAction(Action action)
+  {
+    _onUpdateAction -= action;
+  }
+  #endregion
 
   #region Unity Functions
-  private void Start()
+  protected virtual void Start()
   {
     if(mockData) Setup(mockData);
   }
 
   private void Update()
   {
-    CheckLifetime();
+    _onUpdateAction?.Invoke();
   }
 
   private void FixedUpdate()
@@ -121,8 +131,6 @@ public class Enemy : MonoBehaviour
   {
     _maxHealth = data.maxHealth;
     _currentHealth = _maxHealth;
-    _lifeTime = data.lifeTime;
-    _spawnTime = Time.time;
 
     if (_healthBar) _healthBar.Setup(_maxHealth);
     SubscribeOnHealthUpdated(UpdateHealthBar);
@@ -138,6 +146,11 @@ public class Enemy : MonoBehaviour
 
       ++_currentTargetMoveIndex;
       SetMoveTarget(GridHelper.CellToWorld(_movePath[_currentTargetMoveIndex]));
+    });
+
+    SubscribeOnDie(() => 
+    {
+      EnemyFood.Create(transform.position, new EnemyFood.SetupData { foodValue = 5 });
     });
   }
 
@@ -176,11 +189,6 @@ public class Enemy : MonoBehaviour
   {
     _onDie?.Invoke();
     Destroy();
-  }
-
-  private void CheckLifetime()
-  {
-    if (Time.time >= _spawnTime + _lifeTime) Destroy();
   }
 
   private void Destroy()

@@ -4,26 +4,73 @@ using UnityEngine;
 
 public class Inventory
 {
-  private TowerContainer towerContainer;
+  private Wallet _wallet;
+  private TowerContainer _towerContainer;
+
+  private UIInventory _ui;
+  private bool _isShowing = false;
+  private string _inventoryPath = "Templates/UI/UIInventory";
 
   #region Getter
-  public List<Tower> GetTowers() => towerContainer.GetTowers();
+  public List<Tower> GetTowers() => _towerContainer.GetTowers();
+  public Wallet GetWallet() => _wallet;
   #endregion
   #region Setter
   #endregion
 
-  public Inventory(int towerContainerSize)
+  public Inventory(Wallet.SetupData walletSetupData, int towerContainerSize)
   {
-    towerContainer= new TowerContainer(towerContainerSize);
+    _wallet = new Wallet(walletSetupData);
+    _towerContainer= new TowerContainer(towerContainerSize);
   }
 
   public bool AddTower(Tower tower)
   {
-    return towerContainer.AddTower(tower);
+    return _towerContainer.AddTower(tower);
   }
 
   public bool RemoveTower(Tower tower) 
   {
-    return towerContainer.RemoveTower(tower);
+    return _towerContainer.RemoveTower(tower);
+  }
+
+  public void CreateUI()
+  {
+    MonoBehaviourHelper.CreateUI(_inventoryPath, uiObj => 
+    {
+      uiObj.TryGetComponent(out _ui);
+    });
+  }
+
+  public void ToggleUI()
+  {
+    _isShowing = !_isShowing;
+
+    if(_isShowing)
+    {
+      ShowUI();
+    }
+    else
+    {
+      HideUI();
+    }
+  }
+
+  private void ShowUI()
+  {
+    if (!_ui) CreateUI();
+
+    _ui.Setup(new UIInventory.SetupData
+    {
+      gold = _wallet.GetCurrency(Wallet.CurrencyType.Gold),
+    });
+
+    _ui.Show();
+  }
+
+  private void HideUI()
+  {
+    if (!_ui) CreateUI();
+    _ui.Hide();
   }
 }

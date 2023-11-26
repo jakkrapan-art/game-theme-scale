@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TowerContainer
 {
-  private List<Tower> _towerList;
+  private List<Tower> _towerList = new List<Tower>();
   private int _size;
 
   #region Getter
