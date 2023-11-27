@@ -6,5 +6,7 @@ using UnityEngine;
 public class ScalableEnemyData : EnemyData
 {
   public int maxFood = 25;
-  public float extraScale = 0.3f;
+  public float extraScalePerLevel = 0.3f;
+  public float extraHealthPerLevel = 5;
+  public float extraMoveSpeedPerLevel = 1;
 }

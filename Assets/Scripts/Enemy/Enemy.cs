@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.Serialization;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public enum EnemyTag
@@ -12,9 +10,9 @@ public enum EnemyTag
 
 public class Enemy : MonoBehaviour
 {
-  private int _maxHealth = 10;
+  private Stat _maxHealth;
   private int _currentHealth;
-  private float _moveSpeed = 2f;
+  private Stat _moveSpeed;
   private EnemyTag _tag = EnemyTag.Normal;
   [SerializeField] private UIBar _healthBar;
   private int _queueOrder = -1;
@@ -133,13 +131,13 @@ public class Enemy : MonoBehaviour
 
   protected virtual void Setup(EnemyData data)
   {
-    _maxHealth = data.maxHealth;
-    _currentHealth = _maxHealth;
+    _maxHealth = new Stat(data.maxHealth);
+    _currentHealth = (int)_maxHealth.GetValue();
 
-    _moveSpeed = data.moveSpeed;
+    _moveSpeed = new Stat(data.moveSpeed);
     SetScale(data.scale);
 
-    if (_healthBar) _healthBar.Setup(_maxHealth);
+    if (_healthBar) _healthBar.Setup(_maxHealth.GetValue());
 
     SubscribeOnHealthUpdated(UpdateHealthBar);
 
@@ -172,7 +170,7 @@ public class Enemy : MonoBehaviour
     if (_healthBar)
     {
       _healthBar.gameObject.SetActive(true);
-      _healthBar.UpdateBar(newValue);
+      _healthBar.UpdateBar(newValue, false);
     }
   }
 
@@ -188,7 +186,7 @@ public class Enemy : MonoBehaviour
 
   private void UpdateHealth(int updateAmount)
   {
-    _currentHealth = Math.Clamp(_currentHealth + updateAmount, 0, _maxHealth);
+    _currentHealth = Math.Clamp(_currentHealth + updateAmount, 0, Mathf.RoundToInt(_maxHealth.GetValue()));
     _onHealthUpdated?.Invoke(_currentHealth);
     if (_currentHealth <= 0) Die();
   }
@@ -222,7 +220,7 @@ public class Enemy : MonoBehaviour
   {
     if (!_isMoving || _updatingSclae) return;
 
-    transform.position = Vector2.MoveTowards(transform.position, _moveTarget, _moveSpeed * Time.fixedDeltaTime);
+    transform.position = Vector2.MoveTowards(transform.position, _moveTarget, _moveSpeed.GetValue() * Time.fixedDeltaTime);
     if(Mathf.Approximately(Vector2.Distance(transform.position, _moveTarget), 0))
     {
       _onMoveFinish?.Invoke();
@@ -253,5 +251,17 @@ public class Enemy : MonoBehaviour
 
     transform.localScale = new Vector3(scale, scale, 1);
     _updatingSclae = false;
+  }
+
+  protected void UpdateMoveSpeedStat(float amount)
+  {
+    _moveSpeed.UpdateExtraValue(amount);
+  }
+
+  protected void UpdateHealthStat(float amount)
+  {
+    _maxHealth.UpdateExtraValue(amount);
+    _currentHealth += Mathf.RoundToInt(amount);
+    UpdateHealthBar(Mathf.RoundToInt(_currentHealth));
   }
 }

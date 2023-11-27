@@ -116,7 +116,7 @@ public class Tower : MonoBehaviour, ISelectableObject
     bullet.Setup(new Projectile.ProjectileData 
     {
       target= target,
-      damage = _attackDamage.GetValue(),
+      damage = Mathf.RoundToInt(_attackDamage.GetValue()),
       flySpeed = 5f
     });
   }

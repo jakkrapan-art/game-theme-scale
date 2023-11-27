@@ -7,45 +7,21 @@ using UnityEngine;
 public class Stat
 {
   [SerializeField]
-  private int baseValue = 10;
-  private Dictionary<Tower, List<int>> buffDict;
+  private float baseValue = 10;
+  private float extraVal = 0;
 
-  public Stat(int baseValue)
+  public Stat(float baseValue)
   {
     this.baseValue = baseValue;
-    buffDict = new Dictionary<Tower, List<int>>();
   }
 
-  public void AddModifier(Tower buffer, int newBuff)
+  public void UpdateExtraValue(float val)
   {
-    if(buffDict.TryGetValue(buffer, out List<int> buffList))
-    {
-      buffList.Add(newBuff);
-    }
-    else
-    {
-      buffDict.Add(buffer, new List<int>(newBuff));
-    }
+    extraVal = Mathf.Clamp(extraVal + val, 0, float.MaxValue);
   }
 
-  public void RemoveModifier(Tower buffer) 
+  public float GetValue() 
   {
-    if (!buffDict.ContainsKey(buffer)) return;
-
-    buffDict.Remove(buffer);
-  }
-
-  public int GetValue() 
-  {
-    int totalVal = baseValue;
-    foreach (var modifyList in buffDict.Values)
-    {
-      foreach (var value in modifyList)
-      {
-        totalVal += value;
-      }
-    }
-
-    return totalVal;
+    return baseValue + extraVal;
   }
 }

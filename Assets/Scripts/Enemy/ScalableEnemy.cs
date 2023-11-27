@@ -52,8 +52,10 @@ public class ScalableEnemy : Enemy
       for (int i = 0; i < increaseCount; i++)
       {
         //increase scale and stats
-        float scale = transform.localScale.x + _data.extraScale;
+        float scale = transform.localScale.x + _data.extraScalePerLevel;
         SetScale(scale, false);
+        UpdateHealthStat(_data.extraHealthPerLevel);
+        UpdateMoveSpeedStat(_data.extraMoveSpeedPerLevel);
       }
     }
 
