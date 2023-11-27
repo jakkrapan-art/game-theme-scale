@@ -262,6 +262,7 @@ public class Enemy : MonoBehaviour
   {
     _maxHealth.UpdateExtraValue(amount);
     _currentHealth += Mathf.RoundToInt(amount);
+    _healthBar.UpdateMaxValue(_maxHealth.GetValue());
     UpdateHealthBar(Mathf.RoundToInt(_currentHealth));
   }
 }

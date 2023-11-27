@@ -9,8 +9,7 @@ public class UIBar : MonoBehaviour
   private Slider _slider = null;
   private float _max = 0;
 
-  private float _targetValue = 0;
-  private bool _slowUpdateBar = false;
+  private Coroutine _slowUpdateCoroutine = null;
 
   public void Setup(float maxValue)
   {
@@ -19,9 +18,9 @@ public class UIBar : MonoBehaviour
     gameObject.SetActive(false);
   }
 
-  private void Update()
+  public void UpdateMaxValue(float newValue) 
   {
-    SlowUpdateBar();
+    _max = newValue;
   }
 
   public void UpdateBar(float value, bool instant = true)
@@ -33,24 +32,22 @@ public class UIBar : MonoBehaviour
     }
     else
     {
-      _targetValue = barVal;
-      _slowUpdateBar = true;
+      if (_slowUpdateCoroutine != null) StopCoroutine(_slowUpdateCoroutine);
+      _slowUpdateCoroutine = StartCoroutine(SlowUpdateBar(barVal, 0.8f));
     }
   }
 
-  private void SlowUpdateBar()
+  private IEnumerator SlowUpdateBar(float target, float time)
   {
-    if (!_slowUpdateBar) return;
+    float current = _slider.value;
+    float start = Time.time;
+    while (Time.time <= start + time) 
+    {
+      current = Mathf.Lerp(current, target, 0.2f);
+      _slider.value = current;
+      yield return new WaitForEndOfFrame();
+    }
 
-    if(!Mathf.Approximately(_slider.value, _targetValue))
-    {
-      float newVal = Mathf.Lerp(_slider.value, _targetValue, 0.12f);
-      _slider.value = newVal;
-    }
-    else
-    {
-      _slider.value = _targetValue;
-      _slowUpdateBar = false;
-    }
+    _slider.value = current;
   }
 }
