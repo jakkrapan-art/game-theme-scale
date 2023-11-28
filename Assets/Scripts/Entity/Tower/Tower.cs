@@ -9,8 +9,6 @@ public class Tower : MonoBehaviour, ISelectableObject
   private TowerData _towerData;
 
   private Stat _attackDamage;
-  private bool _canAttack = true;
-  private Action _onAttack;
 
   private bool _isMoving = false;
 
@@ -31,35 +29,20 @@ public class Tower : MonoBehaviour, ISelectableObject
   [SerializeField]
   private Transform _firePoint = default;
 
-  private void SubscribeOnAttack(Action action)
-  {
-    _onAttack += action;
-  }
-
-  private void UnsubscribeOnAttack(Action action)
-  {
-    _onAttack -= action;
-  }
-
-  private void Cleanup()
-  {
-    UnsubscribeOnAttack(() => ShowAttackCooldownBar());
-
-    _onAttack = null;
-  }
+  private TowerStateMachine _stateMachine = null;
 
   #region Unity Functions
   private void Start()
   {
     _towerConnector = new TowerConnector(this, 2);
     _attackDamage = new Stat(3);
+    _stateMachine = new TowerStateMachine(this);
 
     if (_attackCooldownBar) _attackCooldownBar.Setup(_towerData.attackDamage);
-    SubscribeOnAttack(() => ShowAttackCooldownBar());
 
     _attackCooldownBar.gameObject.SetActive(false);
 
-    _enemyDetector = new EnemyDetector(this, 1.5f);
+    _enemyDetector = new EnemyDetector(this, 2.5f);
   }
 
   private void OnMouseDown()
@@ -78,32 +61,25 @@ public class Tower : MonoBehaviour, ISelectableObject
 
   private void Update()
   {
-    if(Input.GetKeyDown(KeyCode.V))
-    {
-      UpdateSize(UnityEngine.Random.Range(1, 5));
-    }
-
     MoveToMouse();
-    Attack();
     UpdateCanPlace();
-    _enemyDetector?.Search();
+
+    _stateMachine?.LogicUpdate();
   }
 
-  private void OnDestroy()
+  private void FixedUpdate()
   {
-    Cleanup();
+    _stateMachine?.PhysicsUpdate();
   }
+
+  #endregion
+  #region Getter
+  public EnemyDetector GetEnemyDetector() => _enemyDetector;
   #endregion
 
-  private void Attack()
+  public void Attack(Enemy target)
   {
-    if (!_canAttack || _enemyDetector == null) return;
-
-    var target = _enemyDetector.GetTargetEnemy();
     if (!target) return;
-
-    _canAttack = false;
-    _onAttack?.Invoke();
     SpawnBullet(target);
   }
 
@@ -121,13 +97,13 @@ public class Tower : MonoBehaviour, ISelectableObject
     });
   }
 
-  private void ShowAttackCooldownBar()
+  public void Reload(Action callback)
   {
     if (!_attackCooldownBar) return;
-    StartCoroutine(DoShowAttackCooldownBar(_towerData.attackInterval));
+    StartCoroutine(DoShowAttackCooldownBar(_towerData.attackInterval, callback));
   }
 
-  private IEnumerator DoShowAttackCooldownBar(float second)
+  private IEnumerator DoShowAttackCooldownBar(float second, Action callback)
   {
     _attackCooldownBar.gameObject.SetActive(true);
     float start = Time.time;
@@ -137,7 +113,7 @@ public class Tower : MonoBehaviour, ISelectableObject
       yield return new WaitForEndOfFrame();
     }
     _attackCooldownBar.gameObject.SetActive(false);
-    _canAttack = true;
+    callback?.Invoke();
   }
 
   public void Connect(Tower other)
