@@ -8,7 +8,7 @@ public class Tower : MonoBehaviour, ISelectableObject
   [SerializeField]
   private TowerData _towerData;
 
-  private Stat _attackDamage;
+  private Status _attackDamage;
 
   private bool _isMoving = false;
 
@@ -35,13 +35,12 @@ public class Tower : MonoBehaviour, ISelectableObject
   private void Start()
   {
     _towerConnector = new TowerConnector(this, 2);
-    _attackDamage = new Stat(3);
+    _attackDamage = new Status(3);
     _stateMachine = new TowerStateMachine(this);
 
     if (_attackCooldownBar) _attackCooldownBar.Setup(_towerData.attackDamage);
 
     _attackCooldownBar.gameObject.SetActive(false);
-
     _enemyDetector = new EnemyDetector(this, 2.5f);
   }
 
@@ -89,6 +88,7 @@ public class Tower : MonoBehaviour, ISelectableObject
     var spawnPos = _firePoint ? _firePoint.position : transform.position;
 
     var bullet = Instantiate(_bullet, spawnPos, Quaternion.identity);
+    if(_towerData.shootSound) SoundController.PlaySound(_towerData.shootSound, 0.4f);
     bullet.Setup(new Projectile.ProjectileData 
     {
       target= target,

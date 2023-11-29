@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class Stat
+public class Status
 {
   [SerializeField]
   private float baseValue = 10;
   private float extraVal = 0;
 
-  public Stat(float baseValue)
+  public Status(float baseValue)
   {
     this.baseValue = baseValue;
   }

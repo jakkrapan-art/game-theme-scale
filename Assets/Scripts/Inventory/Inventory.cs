@@ -36,7 +36,7 @@ public class Inventory
 
   public void CreateUI()
   {
-    MonoBehaviourHelper.CreateUI(_inventoryPath, uiObj => 
+    UIHelper.CreateUI(_inventoryPath, uiObj => 
     {
       uiObj.TryGetComponent(out _ui);
     });

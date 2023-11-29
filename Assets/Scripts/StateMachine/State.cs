@@ -4,8 +4,8 @@ using UnityEngine;
 
 public abstract class State
 {
-  public abstract void OnEnter();
-  public abstract void OnExit();
-  public abstract void LogicUpdate();
-  public abstract void PhysicsUpdate();
+  public virtual void OnEnter() { }
+  public virtual void OnExit() { }
+  public virtual void LogicUpdate() { }
+  public virtual void PhysicsUpdate() { }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
-public class MonoBehaviourHelper : MonoBehaviour
+public class UIHelper : MonoBehaviour
 {
   private static GameObject _instance;
 
@@ -12,7 +12,7 @@ public class MonoBehaviourHelper : MonoBehaviour
     if (_instance) return;
 
     _instance = new GameObject("MonoBehaviourHelper");
-    _instance.AddComponent<MonoBehaviourHelper>();
+    _instance.AddComponent<UIHelper>();
   }
 
   public static void CreateUI(string objPath, Action<GameObject> callback, Transform parent = null)

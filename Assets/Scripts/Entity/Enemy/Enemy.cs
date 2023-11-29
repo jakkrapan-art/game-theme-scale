@@ -10,9 +10,9 @@ public enum EnemyTag
 
 public class Enemy : MonoBehaviour
 {
-  private Stat _maxHealth;
+  private Status _maxHealth;
   private int _currentHealth;
-  private Stat _moveSpeed;
+  private Status _moveSpeed;
   private EnemyTag _tag = EnemyTag.Normal;
   [SerializeField] private UIBar _healthBar;
   private int _queueOrder = -1;
@@ -131,10 +131,10 @@ public class Enemy : MonoBehaviour
 
   protected virtual void Setup(EnemyData data)
   {
-    _maxHealth = new Stat(data.maxHealth);
+    _maxHealth = new Status(data.maxHealth);
     _currentHealth = (int)_maxHealth.GetValue();
 
-    _moveSpeed = new Stat(data.moveSpeed);
+    _moveSpeed = new Status(data.moveSpeed);
     SetScale(data.scale);
 
     if (_healthBar) _healthBar.Setup(_maxHealth.GetValue());
