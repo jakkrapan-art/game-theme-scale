@@ -12,12 +12,14 @@ public class ScalableEnemy : Enemy
 
   private ScalableEnemyData _data;
 
+  #region Unity Functions
   protected override void Start()
   {
     base.Start();
-
     SubscribeOnUpdateAction(SearchFood);
   }
+  #endregion
+
 
   protected override void Setup(EnemyData data)
   {

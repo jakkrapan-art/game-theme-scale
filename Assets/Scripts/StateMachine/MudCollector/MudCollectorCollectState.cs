@@ -7,7 +7,7 @@ public class MudCollectorCollectState : MudCollectorState
   private float _collectTime = 0;
   private EnemyFood _target;
 
-  public MudCollectorCollectState(MudCollectorStateMachine stateMachine, MudCollector mudCollector) : base(stateMachine, mudCollector)
+  public MudCollectorCollectState(MudCollectorStateMachine stateMachine, MudCollector mudCollector, string animationName) : base(stateMachine, mudCollector, animationName)
   {
   }
 
@@ -27,6 +27,12 @@ public class MudCollectorCollectState : MudCollectorState
       if(_target) _entity.Collect(_target);
       ChangeToIdleState();
     });
+  }
+
+  public override void OnExit()
+  {
+    _entity.HideCollectBar();
+    base.OnExit();
   }
 
   public override void LogicUpdate()

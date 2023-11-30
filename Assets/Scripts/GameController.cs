@@ -1,15 +1,23 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class GameController : MonoBehaviour
 {
   private Map _map = default;
   private EnemySpawner _enemySpawner = default;
   private Player _player;
+  private MudCollector _collector;
 
   private string _mapPath = "Templates/Map";
+  private string _mudCollectorPath = "Templates/MudCollector";
+
+  private int _wave = 0;
+  private int _defaultWaveCount = 5;
+  private float _waveMultiplier = 1;
 
   public void Initialize()
   {
@@ -32,12 +40,31 @@ public class GameController : MonoBehaviour
     _map.Setup();
     _enemySpawner = _map.GetEnemySpawner();
 
+    var path = _map.GetPath();
+    var townPos = path[path.Count - 1];
+
+    _collector = Instantiate(Resources.Load<MudCollector>(_mudCollectorPath));
+    _collector.transform.position = townPos;
+    _collector.Setup(new MudCollector.SetupData
+    { 
+      TownPosition = townPos
+    });
+
     StartGame();
   }
 
   private void StartGame()
   {
-    _enemySpawner.Spawn(5, 2f);
+    StartWave();
+  }
+
+  private void StartWave()
+  {
+    int monsterCount = Mathf.RoundToInt(_defaultWaveCount + (_wave * _waveMultiplier));
+    _enemySpawner.Spawn(monsterCount, 2f, () => 
+    {
+      DelayCallFunction(5, () => { StartWave(); });
+    });
   }
 
   private void Update()
@@ -46,5 +73,16 @@ public class GameController : MonoBehaviour
     {
       _player.GetInventory().ToggleUI();
     }
+  }
+
+  private void DelayCallFunction(float second, Action callback)
+  {
+    StartCoroutine(DoDelayCallfunction(second, callback));
+  }
+
+  private IEnumerator DoDelayCallfunction(float time, Action callback)
+  {
+    yield return new WaitForSeconds(time);
+    callback?.Invoke();
   }
 }

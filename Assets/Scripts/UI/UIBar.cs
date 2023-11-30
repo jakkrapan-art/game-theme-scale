@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,24 +24,31 @@ public class UIBar : MonoBehaviour
     _max = newValue;
   }
 
-  public void UpdateBar(float value, bool instant = true, bool showAfterUpdate = true)
+  public void UpdateBar(float value, bool instant = true, bool showAfterUpdate = true, Action onComplete = null, Action onUpdate = null)
   {
+    if (_slowUpdateCoroutine != null)
+    {
+      StopCoroutine(_slowUpdateCoroutine);
+      _slowUpdateCoroutine = null;
+    }
+
     float barVal = value / _max;
+
+    onUpdate?.Invoke();
     if (instant)
     {
       _slider.value = barVal;
       gameObject.SetActive(showAfterUpdate);
+      onComplete?.Invoke();
     }
     else
     {
-      if (_slowUpdateCoroutine != null) StopCoroutine(_slowUpdateCoroutine);
-
       gameObject.SetActive(true);
-      _slowUpdateCoroutine = StartCoroutine(SlowUpdateBar(barVal, 0.8f, showAfterUpdate));
+      _slowUpdateCoroutine = StartCoroutine(SlowUpdateBar(barVal, 0.8f, showAfterUpdate, onComplete));
     }
   }
 
-  private IEnumerator SlowUpdateBar(float target, float time, bool showAfterUpdate)
+  private IEnumerator SlowUpdateBar(float target, float time, bool showAfterUpdate, Action onComplete)
   {
     float current = _slider.value;
     float start = Time.time;
@@ -53,6 +61,7 @@ public class UIBar : MonoBehaviour
     }
 
     _slider.value = current;
+    onComplete?.Invoke();
     gameObject.SetActive(showAfterUpdate);
   }
 }

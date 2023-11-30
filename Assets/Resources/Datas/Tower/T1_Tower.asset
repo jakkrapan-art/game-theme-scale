@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94828e8d6ddc84d41be501903d450768, type: 3}
   m_Name: T1_Tower
   m_EditorClassIdentifier: 
+  shootSound: {fileID: 8300000, guid: aa8ed468fb1dcfa4a8642590f38497e2, type: 3}
   attackInterval: 0.6
   attackDamage: 5
   projectileData: {fileID: 11400000, guid: b90c57176c8c8ae449affbbb7e5c98b1, type: 2}

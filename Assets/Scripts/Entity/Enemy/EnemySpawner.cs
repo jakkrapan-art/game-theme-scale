@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -20,12 +22,12 @@ public class EnemySpawner : MonoBehaviour
     _movePath = movePath;
   }
 
-  public void Spawn(int count, float spawnInterval)
+  public void Spawn(int count, float spawnInterval, Action callback = null)
   {
-    StartCoroutine(DoSpawn(count, spawnInterval));
+    StartCoroutine(DoSpawn(count, spawnInterval, callback));
   }
 
-  private IEnumerator DoSpawn(int count, float spawnInterval)
+  private IEnumerator DoSpawn(int count, float spawnInterval, Action onBossDieCallback)
   {
     int spawnedCount = 0;
 
@@ -46,15 +48,20 @@ public class EnemySpawner : MonoBehaviour
       }
     }
 
-    SpawnEnemy(_boss);
+    SpawnEnemy(_boss, () => 
+    {
+      onBossDieCallback?.Invoke();
+    });
   }
 
-  private void SpawnEnemy(Enemy enemy) 
+  private void SpawnEnemy(Enemy enemy, Action onDieCallback = null) 
   {
     if (!enemy) return;
 
     var spawned = Instantiate(enemy, _spawnPoint + new Vector3(enemy.transform.localScale.x/2, enemy.transform.localScale.y/2), Quaternion.identity);
     spawned.SetMovePath(_movePath);
+
+    spawned.GetComponent<Enemy>()?.SubscribeOnDie(onDieCallback);
   }
 
   private Enemy GetRandomEnemy()

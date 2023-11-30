@@ -5,26 +5,8 @@ using UnityEngine;
 
 public class MudCollectorIdleState : MudCollectorState
 {
-  public MudCollectorIdleState(MudCollectorStateMachine stateMachine, MudCollector mudCollector) : base(stateMachine, mudCollector)
+  public MudCollectorIdleState(MudCollectorStateMachine stateMachine, MudCollector mudCollector, string animationName) : base(stateMachine, mudCollector, animationName)
   {
-  }
-
-  private class DistanceComparer : IComparer<EnemyFood>
-  {
-    private readonly Transform referencePoint;
-
-    public DistanceComparer(Transform reference)
-    {
-      referencePoint = reference;
-    }
-
-    public int Compare(EnemyFood x, EnemyFood b)
-    {
-      float distanceToA = Vector3.Distance(referencePoint.position, x.transform.position);
-      float distanceToB = Vector3.Distance(referencePoint.position, b.transform.position);
-
-      return distanceToA.CompareTo(distanceToB);
-    }
   }
 
   public override void LogicUpdate()
@@ -38,12 +20,38 @@ public class MudCollectorIdleState : MudCollectorState
     var muds = GameObject.FindObjectsOfType<EnemyFood>();
     if (muds == null || muds.Length == 0) return;
 
-    var distanceComparer = new DistanceComparer(_entity.transform);
-    muds.ToList().Sort(distanceComparer);
+    if (_entity.IsMudFull())
+    {
+      _stateMachine.ChangeState(_stateMachine.MoveState);
+      return;
+    }
 
-    var newTarget = muds[0];
+    var newTarget = getNearestTarget(muds);
     _entity.SetTarget(newTarget);
-
     _stateMachine.ChangeState(_stateMachine.MoveState);
+  }
+
+  private EnemyFood getNearestTarget(EnemyFood[] list)
+  {
+    if (list == null || list.Length == 0) return null;
+
+    EnemyFood nearest = null;
+
+    foreach (EnemyFood enemy in list)
+    {
+      if (nearest == null)
+      {
+        nearest = enemy;
+      }
+      else
+      {
+        float distanceA = Vector2.Distance(_entity.transform.position, nearest.transform.position);
+        float distanceB = Vector2.Distance(_entity.transform.position, enemy.transform.position);
+
+        if (distanceB < distanceA) nearest = enemy;
+      }
+    }
+
+    return nearest;
   }
 }

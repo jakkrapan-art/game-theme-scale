@@ -54,6 +54,7 @@ public class Map : MonoBehaviour
   public List<Vector3Int> GetPath() => _path;
   public Vector3Int GetStartPoint() => _mapPattern.startPoint;
   public EnemySpawner GetEnemySpawner() => _enemySpawner;
+  public Vector2 GetSize() => _mapPattern.mapSize;
   #endregion
 
   private void DrawPath()

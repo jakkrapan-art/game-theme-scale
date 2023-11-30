@@ -191,7 +191,7 @@ public class Enemy : MonoBehaviour
     if (_currentHealth <= 0) Die();
   }
 
-  private void Die()
+  protected void Die()
   {
     _onDie?.Invoke();
     Destroy();

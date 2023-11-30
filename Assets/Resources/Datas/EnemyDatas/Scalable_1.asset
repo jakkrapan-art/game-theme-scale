@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Scalable_1
   m_EditorClassIdentifier: 
   maxHealth: 100
-  moveSpeed: 0.7
+  moveSpeed: 0.8
   scale: 0.3
   maxFood: 5
   extraScalePerLevel: 0.3
   extraHealthPerLevel: 10
-  extraMoveSpeedPerLevel: 0.2
+  extraMoveSpeedPerLevel: 0.5

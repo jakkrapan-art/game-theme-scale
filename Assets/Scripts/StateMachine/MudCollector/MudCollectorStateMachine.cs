@@ -9,14 +9,16 @@ public class MudCollectorStateMachine : StateMachine
   public MudCollectorIdleState IdleState { get; }
   public MudCollectorMoveState MoveState { get; }
   public MudCollectorCollectState CollectState { get; }
+  public MudCollectorInvisibleState InvisibleState { get; }
 
   public MudCollectorStateMachine(MudCollector entity)
   {
     _entity = entity;
 
-    IdleState = new MudCollectorIdleState(this, entity);
-    MoveState = new MudCollectorMoveState(this, entity);
-    CollectState = new MudCollectorCollectState(this, entity);
+    IdleState = new MudCollectorIdleState(this, entity, "Idle");
+    MoveState = new MudCollectorMoveState(this, entity, "Move");
+    CollectState = new MudCollectorCollectState(this, entity, "Collect");
+    InvisibleState = new MudCollectorInvisibleState(this, entity, "");
 
     Initialize(IdleState);
   }
