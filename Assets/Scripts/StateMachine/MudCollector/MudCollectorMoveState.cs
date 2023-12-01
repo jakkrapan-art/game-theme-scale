@@ -24,6 +24,8 @@ public class MudCollectorMoveState : MudCollectorState
   {
     base.LogicUpdate();
 
+    if(!_entity.GetAllowCollect()) { _stateMachine.ChangeState(_stateMachine.IdleState); }
+
     if (!_moveToTown)
     {
       if (!_target)

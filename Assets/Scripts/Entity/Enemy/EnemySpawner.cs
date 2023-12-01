@@ -11,15 +11,25 @@ public class EnemySpawner : MonoBehaviour
   private List<Vector3Int> _movePath = new List<Vector3Int>();
   private SpawnType _spawnType = default;
   public enum SpawnType { Random, Fix }
+  private Action<EnemyType> _onEnemyMoveFinish;
+  public enum EnemyType { Minion, Boss }
 
   [SerializeField]
   private ScalableEnemy _boss = default;
 
-  public void Setup(List<Enemy> enemies, Vector3Int spawnPoint, List<Vector3Int> movePath, SpawnType spawnType = SpawnType.Fix)
+  public struct MoveData
+  {
+    public List<Vector3Int> movePath;
+    public Action<EnemyType> onMoveFinish;
+  }
+
+  public void Setup(List<Enemy> enemies, Vector3Int spawnPoint, MoveData moveData, SpawnType spawnType = SpawnType.Fix)
   {
     _possibleEnemies = enemies;
     _spawnPoint = spawnPoint;
-    _movePath = movePath;
+    _movePath = moveData.movePath;
+    _onEnemyMoveFinish = moveData.onMoveFinish;
+    _spawnType = spawnType;
   }
 
   public void Spawn(int count, float spawnInterval, Action callback = null)
@@ -27,7 +37,7 @@ public class EnemySpawner : MonoBehaviour
     StartCoroutine(DoSpawn(count, spawnInterval, callback));
   }
 
-  private IEnumerator DoSpawn(int count, float spawnInterval, Action onBossDieCallback)
+  private IEnumerator DoSpawn(int count, float spawnInterval, Action callback)
   {
     int spawnedCount = 0;
 
@@ -36,7 +46,10 @@ public class EnemySpawner : MonoBehaviour
 
     while (spawnedCount < count) 
     {
-      SpawnEnemy(enemy);
+      var minion = SpawnEnemy(enemy);
+      if (!minion) continue;
+
+      minion.SubscribeOnReachTarget(() => _onEnemyMoveFinish?.Invoke(EnemyType.Minion));
       spawnedCount++;
 
       yield return new WaitForSeconds(spawnInterval);
@@ -48,20 +61,26 @@ public class EnemySpawner : MonoBehaviour
       }
     }
 
-    SpawnEnemy(_boss, () => 
-    {
-      onBossDieCallback?.Invoke();
-    });
+    callback?.Invoke();
   }
 
-  private void SpawnEnemy(Enemy enemy, Action onDieCallback = null) 
+  public void SpawnBoss(Action callback)
   {
-    if (!enemy) return;
+    var boss = SpawnEnemy(_boss, null, callback);
+    if (boss) boss.SubscribeOnReachTarget(() => _onEnemyMoveFinish?.Invoke(EnemyType.Boss));
+  }
+
+  private Enemy SpawnEnemy(Enemy enemy, Action onDieCallback = null, Action onDestroy = null) 
+  {
+    if (!enemy) return null;
 
     var spawned = Instantiate(enemy, _spawnPoint + new Vector3(enemy.transform.localScale.x/2, enemy.transform.localScale.y/2), Quaternion.identity);
     spawned.SetMovePath(_movePath);
 
-    spawned.GetComponent<Enemy>()?.SubscribeOnDie(onDieCallback);
+    var enemyCompo = spawned.GetComponent<Enemy>();
+    enemyCompo?.SubscribeOnDie(onDieCallback);
+    enemyCompo?.SubscribeOnDestroy(onDestroy);
+    return spawned;
   }
 
   private Enemy GetRandomEnemy()

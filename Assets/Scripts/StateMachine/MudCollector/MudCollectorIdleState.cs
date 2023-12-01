@@ -12,6 +12,8 @@ public class MudCollectorIdleState : MudCollectorState
   public override void LogicUpdate()
   {
     base.LogicUpdate();
+
+    if (!_entity.GetAllowCollect()) return;
     SearchTarget();
   }
 

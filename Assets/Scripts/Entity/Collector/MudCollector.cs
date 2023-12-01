@@ -19,8 +19,10 @@ public class MudCollector : MonoBehaviour
   private string _currentAnim = "";
 
   private Vector3 _townPos = new Vector3(5, 5);
+  private Action<int> _exchangeMudAction = null;
   private bool _moveToTown = false;
   private bool _isFacingRight = false;
+  private bool _allowCollect = true;
 
   #region Stats
   private Status _moveSpeed;
@@ -42,6 +44,7 @@ public class MudCollector : MonoBehaviour
   public float GetCollectRange() => _collectRange.GetValue();
   public float GetCollectTime() => _collectTime.GetValue();
   public int GetMudCount() => _currentMudCount;
+  public bool GetAllowCollect() => _allowCollect;
   public bool IsMudFull() => _currentMudCount == Mathf.RoundToInt(_mudContainerSize.GetValue());
   public bool IsMoveToTown() => _moveToTown;
   public Vector3 GetTownPosition() => _townPos;
@@ -55,7 +58,7 @@ public class MudCollector : MonoBehaviour
     _moveSpeed = new Status(1.5f);
     _collectRange = new Status(0.8f);
     _collectTime = new Status(2.5f);
-    _mudContainerSize = new Status(5);
+    _mudContainerSize = new Status(25);
   }
 
   private void Start()
@@ -82,11 +85,13 @@ public class MudCollector : MonoBehaviour
   public struct SetupData
   {
     public Vector3 TownPosition;
+    public Action<int> ExchangeMudAction;
   }
 
   public void Setup(SetupData setupData)
   {
     _townPos = setupData.TownPosition;
+    _exchangeMudAction= setupData.ExchangeMudAction;
   }
 
   public void MoveTo(Vector3 pos)
@@ -164,10 +169,12 @@ public class MudCollector : MonoBehaviour
     }
   }
 
-  public void StoreMudToTown()
+  public void SellToTown()
   {
+    _exchangeMudAction?.Invoke(_currentMudCount);
     _currentMudCount = 0;
     _moveToTown = false;
+
     UpdateContainingMud();
   }
 
@@ -183,5 +190,10 @@ public class MudCollector : MonoBehaviour
     if(!string.IsNullOrEmpty(_currentAnim)) _anim.SetBool(_currentAnim, false);
     _anim.SetBool(name, true);
     _currentAnim = name;
+  }
+
+  public void SetAllowCollect(bool allowCollect)
+  {
+    _allowCollect = allowCollect;
   }
 }

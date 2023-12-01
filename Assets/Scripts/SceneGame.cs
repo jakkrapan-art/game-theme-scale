@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class SceneGame : MonoBehaviour
 {
+  [SerializeField] List<Tower> startTowers = new List<Tower>();
+
   private void Start()
   {
     GameController controller = new GameObject("GameController").AddComponent<GameController>();
-    controller.Initialize();
+    controller.Initialize(startTowers);
   }
 }

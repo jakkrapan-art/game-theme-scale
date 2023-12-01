@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class Tower : MonoBehaviour, ISelectableObject
 {
@@ -41,11 +42,13 @@ public class Tower : MonoBehaviour, ISelectableObject
     if (_attackCooldownBar) _attackCooldownBar.Setup(_towerData.attackDamage);
 
     _attackCooldownBar.gameObject.SetActive(false);
-    _enemyDetector = new EnemyDetector(this, 2.5f);
+    _enemyDetector = new EnemyDetector(2.5f);
   }
 
   private void OnMouseDown()
   {
+    if (EventSystem.current.IsPointerOverGameObject()) return;
+
     var cursor = Cursor.GetInstance();
     var currentSelecting = cursor.GetCurrentSelecting();
     if (currentSelecting != null && currentSelecting.Equals(this))
@@ -60,8 +63,8 @@ public class Tower : MonoBehaviour, ISelectableObject
 
   private void Update()
   {
-    MoveToMouse();
-    UpdateCanPlace();
+    //MoveToMouse();
+    //UpdateCanPlace();
 
     _stateMachine?.LogicUpdate();
   }
@@ -74,6 +77,7 @@ public class Tower : MonoBehaviour, ISelectableObject
   #endregion
   #region Getter
   public EnemyDetector GetEnemyDetector() => _enemyDetector;
+  public SpriteRenderer GetSpriteRenderer() => _spriteRenderer;
   #endregion
 
   public void Attack(Enemy target)
@@ -114,6 +118,11 @@ public class Tower : MonoBehaviour, ISelectableObject
     }
     _attackCooldownBar.gameObject.SetActive(false);
     callback?.Invoke();
+  }
+
+  public Enemy SearchEnemy()
+  {
+    return _enemyDetector.Search(transform.position);
   }
 
   public void Connect(Tower other)
@@ -165,19 +174,10 @@ public class Tower : MonoBehaviour, ISelectableObject
     return this;
   }
 
-  private void UpdateCanPlace()
+  public void UpdateCanplaceDisplay(bool canPlace)
   {
     if (!_placeableDisplay) return;
-
-    if (!_isMoving)
-    {
-      _placeableDisplay.SetDisplay(PlaceableDisplay.DisplayType.Hide);
-      return;
-    }
-
-    _canPlace = IsCanPlace();
-
-    if (_canPlace)
+    if (canPlace)
     {
       _placeableDisplay.SetDisplay(PlaceableDisplay.DisplayType.Placeable);
     }

@@ -1,10 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public abstract class StateMachine
 {
-  private State _currentState = null;
+  [SerializeField]
+  protected State _currentState = null;
 
   public virtual void Initialize(State initialState)
   {

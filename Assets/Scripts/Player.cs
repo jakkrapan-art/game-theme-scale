@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +9,8 @@ public class Player
   {
     public int inventorySize;
     public Wallet.SetupData walletSetupData;
+
+    public Action<Tower> enterBuildMode;
   }
 
   private Inventory _inventory;
@@ -18,6 +21,6 @@ public class Player
 
   public Player(PlayerInitData data)
   {
-    _inventory = new Inventory(data.walletSetupData, data.inventorySize);
+    _inventory = new Inventory(data.walletSetupData, data.inventorySize, data.enterBuildMode);
   }
 }

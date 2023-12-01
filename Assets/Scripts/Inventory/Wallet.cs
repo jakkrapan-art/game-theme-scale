@@ -1,9 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Wallet
 {
+  private Action<int> _onUpdateGoldAction = null;
+
   public enum CurrencyType
   {
     Gold, Meat
@@ -36,6 +39,16 @@ public class Wallet
     }
   }
 
+  public void SubscribeOnUpdateGold(Action<int> action)
+  {
+    _onUpdateGoldAction += action;
+  }
+
+  public void UnsubscribeOnUpdateGold(Action<int> action)
+  {
+    _onUpdateGoldAction -= action;
+  }
+
   public int GetCurrency(CurrencyType type)
   {
     return _currencies[type];
@@ -50,6 +63,15 @@ public class Wallet
     else
     {
       _currencies.Add(data.Type, data.Amount);
+    }
+
+    switch(data.Type) 
+    {
+      case CurrencyType.Gold:
+        _onUpdateGoldAction?.Invoke(_currencies[data.Type]);
+        break;
+      default:
+        break;
     }
   }
 }

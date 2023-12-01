@@ -1,9 +1,7 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.WSA;
 
 public class Map : MonoBehaviour
 {
@@ -16,18 +14,17 @@ public class Map : MonoBehaviour
 
   [SerializeField]
   private List<Vector3Int> _path = default;
-
   [SerializeField]
   private MapPattern _mapPattern;
-
   [SerializeField]
   private Vector3Int _endPoint;
-
   private EnemySpawner _enemySpawner;
+  private List<Vector3Int> _avaliableNode = new List<Vector3Int>();
+  private Dictionary<Tower, Vector3Int> _towerDict = new Dictionary<Tower, Vector3Int>();
 
   private readonly string _enemySpawnerTemplatePath = "Templates/EnemySpawner";
 
-  public void Setup()
+  public void Setup(Action<EnemySpawner.EnemyType> onEnemyReachTarget)
   {
     _path.Clear();
 
@@ -35,17 +32,19 @@ public class Map : MonoBehaviour
     DrawPath();
 
     Camera.main.transform.position = new Vector3(_mapPattern.mapSize.x / 2, _mapPattern.mapSize.y / 2, Camera.main.transform.position.z);
-
-    CreateEnemySpawner();
+    CreateEnemySpawner(onEnemyReachTarget);
   }
 
   private void InitialMap()
   {
+    _avaliableNode.Clear();
     for (int x = 0; x < _mapPattern.mapSize.x; x++)
     {
       for (int y = 0; y < _mapPattern.mapSize.y; y++)
       {
-        GridHelper.SetTile(_dirtTile, new Vector3Int(x, y));
+        var cell = new Vector3Int(x, y);
+        GridHelper.SetTile(_dirtTile, cell);
+        _avaliableNode.Add(cell);
       }
     }
   }
@@ -55,6 +54,7 @@ public class Map : MonoBehaviour
   public Vector3Int GetStartPoint() => _mapPattern.startPoint;
   public EnemySpawner GetEnemySpawner() => _enemySpawner;
   public Vector2 GetSize() => _mapPattern.mapSize;
+  public Vector3 GetEndpoint() => _endPoint;
   #endregion
 
   private void DrawPath()
@@ -99,13 +99,57 @@ public class Map : MonoBehaviour
 
   private void SetPathTile(Vector3Int cell)
   {
+    if (!_avaliableNode.Contains(cell)) return;
+
     GridHelper.SetTile(_pathTile, cell);
+    _avaliableNode.Remove(cell);
   }
 
-  private void CreateEnemySpawner()
+  private void CreateEnemySpawner(Action<EnemySpawner.EnemyType> onEnemyReachTarget)
   {
     var point = _mapPattern.startPoint;
     _enemySpawner = Instantiate(Resources.Load<EnemySpawner>(_enemySpawnerTemplatePath));
-    _enemySpawner.Setup(_mapPattern.possibleEnemies, point, _path, EnemySpawner.SpawnType.Fix);
+    _enemySpawner.Setup(_mapPattern.possibleEnemies, point, new EnemySpawner.MoveData
+    {
+      movePath = _path,
+      onMoveFinish = onEnemyReachTarget
+    }, EnemySpawner.SpawnType.Fix);
+  }
+
+  public bool PlaceTower(Tower tower, Vector3 pos)
+  {
+    if (!tower) return false;
+
+    var cell = GridHelper.WorldToCell(pos);
+    cell.y = 0;
+    if (!_avaliableNode.Contains(cell)) return false;
+
+    _avaliableNode.Remove(cell);
+    _towerDict.Add(tower, cell);
+    return true;
+  }
+
+  public void UpdateTowerPosition(Tower tower, Vector3 mousePos)
+  {
+    var cell = GridHelper.WorldToCell(mousePos);
+    var newPos = new Vector2(cell.x + 0.5f, cell.y + 0.5f);
+    tower.transform.position = newPos;
+    tower.UpdateCanplaceDisplay(CheckCanPlace(newPos));
+  }
+
+  private bool CheckCanPlace(Vector3 position)
+  {
+    var cell = GridHelper.WorldToCell(position);
+    cell.z = 0;
+    return _avaliableNode.Contains(cell);
+  }
+
+  public void PlaceTower(Tower tower)
+  {
+    var cell = GridHelper.WorldToCell(tower.transform.position);
+    cell.z = 0;
+
+    if (_towerDict.TryGetValue(tower, out var oldCell)) _avaliableNode.Add(oldCell);
+    _avaliableNode.Remove(cell);
   }
 }

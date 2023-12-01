@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,8 +11,6 @@ public class SlideTransition : MonoBehaviour, ITransition
   private float slideSpeed = 1000f;
   [SerializeField]
   private TransitionDirection transitionDirection = TransitionDirection.Left; // Default transition direction
-  private bool _isPanelVisible = false;
-
   private Vector2 _defaultAnchored = default;
 
   private void Awake()
@@ -25,32 +24,9 @@ public class SlideTransition : MonoBehaviour, ITransition
     HidePanel();
   }
 
-  void Update()
-  {
-    if (Input.GetKeyDown(KeyCode.S))
-    {
-      TogglePanel();
-    }
-  }
-
-  void TogglePanel()
-  {
-    if (_isPanelVisible)
-    {
-      // Transition out
-      TransitionOut();
-    }
-    else
-    {
-      // Transition in
-      TransitionIn();
-    }
-
-    _isPanelVisible = !_isPanelVisible;
-  }
-
   public void TransitionIn()
   {
+    _panel.gameObject.SetActive(true);
     Vector2 targetPosition = GetTargetPosition();
     StartCoroutine(SlidePanel(targetPosition, 0.5f));
   }
@@ -58,12 +34,13 @@ public class SlideTransition : MonoBehaviour, ITransition
   public void TransitionOut()
   {
     Vector2 targetPosition = GetHiddenPosition();
-    StartCoroutine(SlidePanel(targetPosition, 0.5f));
+    StartCoroutine(SlidePanel(targetPosition, 0.5f, () => { _panel.gameObject.SetActive(false); }));
   }
 
   private void HidePanel()
   {
     _panel.anchoredPosition = GetHiddenPosition();
+    _panel.gameObject.SetActive(false);
   }
 
   private Vector2 GetHiddenPosition()
@@ -88,7 +65,7 @@ public class SlideTransition : MonoBehaviour, ITransition
     return _defaultAnchored;
   }
 
-  private System.Collections.IEnumerator SlidePanel(Vector2 targetPosition, float duration)
+  private System.Collections.IEnumerator SlidePanel(Vector2 targetPosition, float duration, Action callback = null)
   {
     float elapsedTime = 0;
     Vector2 startingPosition = _panel.anchoredPosition;
@@ -101,5 +78,6 @@ public class SlideTransition : MonoBehaviour, ITransition
     }
 
     _panel.anchoredPosition = targetPosition;
+    callback?.Invoke();
   }
 }

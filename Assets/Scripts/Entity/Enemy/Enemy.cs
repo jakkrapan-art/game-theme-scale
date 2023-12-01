@@ -106,6 +106,18 @@ public class Enemy : MonoBehaviour
     _onUpdateAction -= action;
   }
   #endregion
+  #region OnReachTargetAction
+  private Action _onReachTarget = null;
+  public void SubscribeOnReachTarget(Action action)
+  {
+    _onReachTarget += action;
+  }
+
+  public void UnsubscribeOnReachTarget(Action action)
+  {
+    _onReachTarget -= action;
+  }
+#endregion
 
   #region Unity Functions
   protected virtual void Start()
@@ -113,7 +125,7 @@ public class Enemy : MonoBehaviour
     if(data) Setup(data);
   }
 
-  private void Update()
+  protected virtual void Update()
   {
     _onUpdateAction?.Invoke();
   }
@@ -146,6 +158,7 @@ public class Enemy : MonoBehaviour
       if(_currentTargetMoveIndex >= _movePath.Count - 1)
       {
         _isMoving = false;
+        _onReachTarget?.Invoke();
         Destroy(gameObject);
         return;
       }
@@ -227,15 +240,20 @@ public class Enemy : MonoBehaviour
     }
   }
 
-  protected void SetScale(float scale, bool instant = true)
+  protected void SetScale(float scale, bool instant = true, Action onComplete = null)
   {
     if(!instant)
-      StartCoroutine(DoUpdateScale(scale));
+    { 
+      StartCoroutine(DoUpdateScale(scale, onComplete));
+    }
     else
+    {
       transform.localScale = new Vector3(scale, scale, 1);
+      onComplete?.Invoke();
+    }
   }
 
-  private IEnumerator DoUpdateScale(float scale)
+  private IEnumerator DoUpdateScale(float scale, Action callback)
   {
     float time = 1.25f;
     float startTime = Time.time;
@@ -251,6 +269,7 @@ public class Enemy : MonoBehaviour
 
     transform.localScale = new Vector3(scale, scale, 1);
     _updatingSclae = false;
+    callback?.Invoke();
   }
 
   protected void UpdateMoveSpeedStat(float amount)

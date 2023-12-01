@@ -1,19 +1,12 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 public class EnemyDetector
 {
   private float _radius = 0;
-  private Tower _tower = default;
   private Enemy _target = default;
 
-  public EnemyDetector(Tower tower, float radius)
+  public EnemyDetector(float radius)
   {
-    _tower = tower;
     _radius = radius;
   }
 
@@ -22,33 +15,52 @@ public class EnemyDetector
   public float GetRadius() => _radius;
   #endregion
 
-  public void Search()
+  public Enemy Search(Vector3 towerPos)
   {
     if (_target)
     {
-      CheckDistanceBetweenTarget();
-      return;
+      CheckDistanceBetweenTarget(towerPos);
     }
-
-    var hit = Physics2D.OverlapCircle(_tower.transform.position, _radius);
-    if (!hit || !hit.gameObject.TryGetComponent(out Enemy e))
-    {      
-      ClearTarget();
-      return;
-    }
-
-    _target = e;
-    _target.SubscribeOnDie(() =>
+    else
     {
-      ClearTarget();
-    });
+      var hits = Physics2D.CircleCastAll(towerPos, _radius, Vector2.zero);
+      if (hits == null || hits.Length == 0)
+      {
+        ClearTarget();
+        return null;
+      }
+
+      Enemy nearestTarget = null;
+      float nearestDistance = float.MaxValue;
+
+      foreach (var hit in hits)
+      {
+        if(hit.collider.gameObject.TryGetComponent<Enemy>(out var e))
+        {
+          float distance = Vector3.Distance(towerPos, hit.point);
+          if (distance < nearestDistance) 
+          {
+            nearestTarget = e;
+            nearestDistance = distance;
+          }
+        }
+      }
+      if (!nearestTarget) return null;
+      _target = nearestTarget;
+      _target.SubscribeOnDie(() =>
+      {
+        ClearTarget();
+      });
+    }
+
+    return _target;
   }
 
-  private void CheckDistanceBetweenTarget()
+  private void CheckDistanceBetweenTarget(Vector3 towerPos)
   {
     if (_target == null) return;
 
-    var distance = Vector3.Distance(_tower.transform.position, _target.transform.position);
+    var distance = Vector3.Distance(towerPos, _target.transform.position);
     if (distance > _radius)
     {
       ClearTarget();

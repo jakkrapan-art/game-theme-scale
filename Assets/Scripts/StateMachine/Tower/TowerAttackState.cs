@@ -1,20 +1,25 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public class TowerAttackState : TowerState
 {
+  private Enemy _target = null;
   public TowerAttackState(Tower tower, TowerStateMachine stateMachine) : base(tower, stateMachine)
   {
   }
 
   public override void OnEnter()
   {
-    var target = _tower.GetEnemyDetector().GetTargetEnemy();
+    _target = _tower.GetEnemyDetector().GetTargetEnemy();
+  }
 
-    if (target)
+  public override void OnExit() 
+  {
+    _target = null;
+  }
+
+  public override void LogicUpdate() 
+  {
+    if (_target)
     {
-      _tower.Attack(target);
+      _tower.Attack(_target);
       _stateMachine.ChangeState(_stateMachine.ReloadState);
     }
     else
@@ -22,8 +27,5 @@ public class TowerAttackState : TowerState
       _stateMachine.ChangeState(_stateMachine.IdleState);
     }
   }
-
-  public override void OnExit() {}
-  public override void LogicUpdate() {}
   public override void PhysicsUpdate() {}
 }

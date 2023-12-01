@@ -13,7 +13,7 @@ public class MudCollectorInvisibleState : MudCollectorState
     base.OnEnter();
     InvisibleTracker.Create(_entity.gameObject, 5, () => 
     {
-      _entity.StoreMudToTown();
+      _entity.SellToTown();
       _stateMachine.ChangeState(_stateMachine.IdleState);
     });
   }

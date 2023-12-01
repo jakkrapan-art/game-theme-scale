@@ -15,6 +15,10 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6421420199570143931, guid: eab2bcab9bc947e4d9ece1f23e1e20ca, type: 3}
+      propertyPath: m_Radius
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6506069111862545195, guid: eab2bcab9bc947e4d9ece1f23e1e20ca, type: 3}
       propertyPath: m_RootOrder
       value: 0
