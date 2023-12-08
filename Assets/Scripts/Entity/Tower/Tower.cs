@@ -33,16 +33,19 @@ public class Tower : MonoBehaviour, ISelectableObject
   private TowerStateMachine _stateMachine = null;
 
   #region Unity Functions
-  private void Start()
+  private void Awake()
   {
     _towerConnector = new TowerConnector(this, 2);
     _attackDamage = new Status(3);
     _stateMachine = new TowerStateMachine(this);
 
     if (_attackCooldownBar) _attackCooldownBar.Setup(_towerData.attackDamage);
-
-    _attackCooldownBar.gameObject.SetActive(false);
     _enemyDetector = new EnemyDetector(2.5f);
+  }
+
+  private void Start()
+  {
+    if (_attackCooldownBar) _attackCooldownBar.gameObject.SetActive(false);
   }
 
   private void OnMouseDown()
@@ -63,9 +66,6 @@ public class Tower : MonoBehaviour, ISelectableObject
 
   private void Update()
   {
-    //MoveToMouse();
-    //UpdateCanPlace();
-
     _stateMachine?.LogicUpdate();
   }
 
@@ -154,15 +154,6 @@ public class Tower : MonoBehaviour, ISelectableObject
     if (_spriteRenderer) _spriteRenderer.sortingOrder -= 1;
   }
 
-  private void MoveToMouse()
-  {
-    if (!_isMoving) return;
-
-    var mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-    var newPos = new Vector3(Mathf.Floor(mousePos.x), Mathf.Floor(mousePos.y), transform.position.z) + new Vector3(0.5f, 0.5f);
-    transform.position = newPos;
-  }
-
   public Tower Place()
   {
     if(_canPlace)
@@ -225,5 +216,10 @@ public class Tower : MonoBehaviour, ISelectableObject
         Gizmos.DrawLine(transform.position, target.transform.position);
       }
     }
+  }
+
+  public void SetEnable(bool enable)
+  {
+    _stateMachine?.SetEnable(enable);
   }
 }

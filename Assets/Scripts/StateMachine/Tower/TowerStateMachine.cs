@@ -1,12 +1,10 @@
-using UnityEngine;
-
 public class TowerStateMachine : StateMachine
 {
   private Tower _tower;
-  public string currentState;
-  [field: SerializeField] public TowerIdleState IdleState { get; private set; }
-  [field: SerializeField] public TowerReloadState ReloadState { get; private set; }
-  [field: SerializeField] public TowerAttackState AttackState { get; private set; }
+  public TowerIdleState IdleState { get; private set; }
+  public TowerReloadState ReloadState { get; private set; }
+  public TowerAttackState AttackState { get; private set; }
+  public TowerDisableState DisableState { get; private set; }
   
 
   public TowerStateMachine(Tower tower)
@@ -23,6 +21,13 @@ public class TowerStateMachine : StateMachine
   public override void LogicUpdate()
   {
     base.LogicUpdate();
-    currentState = _currentState.ToString();
+  }
+
+  public void SetEnable(bool enable)
+  {
+    if (enable)
+      ChangeState(IdleState);
+    else 
+      ChangeState(DisableState);
   }
 }

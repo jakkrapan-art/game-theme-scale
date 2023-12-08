@@ -148,7 +148,7 @@ public class Map : MonoBehaviour
   {
     var cell = GridHelper.WorldToCell(tower.transform.position);
     cell.z = 0;
-
+    tower.SetEnable(true);
     if (_towerDict.TryGetValue(tower, out var oldCell)) _avaliableNode.Add(oldCell);
     _avaliableNode.Remove(cell);
   }

@@ -20,15 +20,15 @@ public abstract class StateMachine
     }
 
     _currentState = state;
-    _currentState.OnEnter();
+    _currentState?.OnEnter();
   }
 
   public virtual void LogicUpdate()
   {
-    _currentState.LogicUpdate();
+    _currentState?.LogicUpdate();
   }
   public virtual void PhysicsUpdate()
   {
-    _currentState.PhysicsUpdate();
+    _currentState?.PhysicsUpdate();
   }
 }

@@ -18,15 +18,14 @@ public class BuildingSystem : MonoBehaviour
     _tower = tower;
     tower.gameObject.SetActive(true);
     _inBuildMode = true;
+    tower.SetEnable(false);
   }
 
   public Tower ExitBuildMode()
   {
     var tower = _tower;
-
     _tower = null;
     _inBuildMode = false;
-
     return tower;
   }
 
