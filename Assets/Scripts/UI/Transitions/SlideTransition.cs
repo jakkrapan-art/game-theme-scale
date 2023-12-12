@@ -8,8 +8,6 @@ public class SlideTransition : MonoBehaviour, ITransition
   [SerializeField]
   private RectTransform _panel;
   [SerializeField]
-  private float slideSpeed = 1000f;
-  [SerializeField]
   private TransitionDirection transitionDirection = TransitionDirection.Left; // Default transition direction
   private Vector2 _defaultAnchored = default;
   private Coroutine _doingCoroutine;

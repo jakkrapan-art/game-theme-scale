@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -32,9 +33,9 @@ public class EnemySpawner : MonoBehaviour
     _spawnType = spawnType;
   }
 
-  public void Spawn(int count, float spawnInterval, Action callback = null)
+  public void Spawn(int count, float spawnInterval, Action onAllDie = null)
   {
-    StartCoroutine(DoSpawn(count, spawnInterval, callback));
+    StartCoroutine(DoSpawn(count, spawnInterval, onAllDie));
   }
 
   private IEnumerator DoSpawn(int count, float spawnInterval, Action callback)
@@ -44,12 +45,23 @@ public class EnemySpawner : MonoBehaviour
     Enemy enemy = GetRandomEnemy();
     if (!enemy) yield break;
 
+    int remainCount = count;
+
     while (spawnedCount < count) 
     {
       var minion = SpawnEnemy(enemy);
       if (!minion) continue;
 
       minion.SubscribeOnReachTarget(() => _onEnemyMoveFinish?.Invoke(EnemyType.Minion));
+      minion.SubscribeOnDestroy(() =>
+      {
+        remainCount--;
+        if (remainCount == 0)
+        {
+          callback?.Invoke();
+        }
+      });
+
       spawnedCount++;
 
       yield return new WaitForSeconds(spawnInterval);
@@ -60,17 +72,15 @@ public class EnemySpawner : MonoBehaviour
         if(!enemy) yield break;
       }
     }
-
-    callback?.Invoke();
   }
 
   public void SpawnBoss(Action callback)
   {
-    var boss = SpawnEnemy(_boss, null, callback);
+    var boss = SpawnEnemy(_boss, callback);
     if (boss) boss.SubscribeOnReachTarget(() => _onEnemyMoveFinish?.Invoke(EnemyType.Boss));
   }
 
-  private Enemy SpawnEnemy(Enemy enemy, Action onDieCallback = null, Action onDestroy = null) 
+  private Enemy SpawnEnemy(Enemy enemy, Action onDestroy = null, Action onDieCallback = null) 
   {
     if (!enemy) return null;
 

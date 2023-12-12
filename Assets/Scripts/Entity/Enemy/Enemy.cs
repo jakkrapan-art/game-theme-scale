@@ -159,7 +159,7 @@ public class Enemy : MonoBehaviour
       {
         _isMoving = false;
         _onReachTarget?.Invoke();
-        Destroy(gameObject);
+        Destroy();
         return;
       }
 

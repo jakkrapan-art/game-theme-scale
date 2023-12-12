@@ -13,17 +13,14 @@ public class GameController : MonoBehaviour
   private int _health = 3;
   private GameObject _gameOver;
 
-  private UIWaveController _waveController = default;
+  private WaveController _waveController;
+  private UIWaveController uiWave = default;
 
   private bool _end = false;
 
-  private string _mapPath = "Templates/Map";
-  private string _mudCollectorPath = "Templates/MudCollector";
-  private string _towerPath = "Templates/Tower";
-
-  private int _wave = 0;
-  private int _defaultWaveCount = 5;
-  private float _waveMultiplier = 1.4f;
+  private const string _mapPath = "Templates/Map";
+  private const string _mudCollectorPath = "Templates/MudCollector";
+  private const string _towerPath = "Templates/Tower";
 
   public Map GetMap() => _map;
 
@@ -82,6 +79,25 @@ public class GameController : MonoBehaviour
     });
     _enemySpawner = _map.GetEnemySpawner();
 
+    _waveController = new WaveController(new WaveController.SetupParam 
+    {
+      baseCount = 10,
+      spawner = _enemySpawner,
+      spawnInterval = 1.25f,
+      onWaveEnd = (wave) => 
+      {
+        Debug.Log("wave " + wave + " ended.");
+        if(wave != 0 && wave % 2 == 0)
+        {
+          _waveController.SpawnBoss();
+        }
+        else
+        {
+          EndWave();
+        }
+      }
+    });
+
     var buildingSysGo = new GameObject("BuildingSystem");
     _buildingSystem = buildingSysGo.AddComponent<BuildingSystem>();
 
@@ -105,36 +121,36 @@ public class GameController : MonoBehaviour
       _healthUI = ui;
     });
 
-    _waveController = FindObjectOfType<UIWaveController>();
-    if (_waveController)
+    uiWave = FindObjectOfType<UIWaveController>();
+    if (uiWave)
     {
-      _waveController.Setup(() => 
-      { 
+      uiWave.Setup(() =>
+      {
         var inv = _player.GetInventory();
         inv.HideUI();
         inv.SetActiveOpenButton(false);
-        _waveController.Hide();
+        uiWave.Hide();
 
-        if(_buildingSystem.IsInBuildMode())
+        if (_buildingSystem.IsInBuildMode())
         {
           var tower = _buildingSystem.ExitBuildMode();
-          if(tower) inv.AddTower(tower);
+          if (tower) inv.AddTower(tower);
         }
 
         StartWave();
       });
 
-      _waveController.Show();
+      uiWave.Show();
     }
   }
 
   private void StartWave()
   {
-    ++_wave;
     _player.GetInventory().SetActiveOpenButton(false);
     _collector.SetAllowCollect(true);
-    int monsterCount = Mathf.RoundToInt(_defaultWaveCount + (_wave * _waveMultiplier));
-    _enemySpawner.Spawn(monsterCount, 2f, () => 
+    _waveController?.SpawnEnemy();
+    //int monsterCount = Mathf.RoundToInt(_defaultWaveCount + (_wave * _waveMultiplier));
+    /*_enemySpawner.Spawn(monsterCount, 2f, () => 
     {
       if (_end) return;
 
@@ -149,7 +165,7 @@ public class GameController : MonoBehaviour
       {
         EndWave();
       }
-    });
+    });*/
   }
 
   private void EndWave()
@@ -159,9 +175,9 @@ public class GameController : MonoBehaviour
 
     var inv = _player.GetInventory();
     inv.SetActiveOpenButton(true);
-    _waveController.Show();
-
+    //uiWave.Show();
     _collector.SetAllowCollect(false);
+    Invoke(nameof(StartWave), 5);
   }
 
   private void AddTowerToInventory(Tower t)

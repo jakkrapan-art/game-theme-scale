@@ -10,9 +10,6 @@ public class Tower : MonoBehaviour, ISelectableObject
   private TowerData _towerData;
 
   private Status _attackDamage;
-
-  private bool _isMoving = false;
-
   [SerializeField]
   private UIBar _attackCooldownBar = null;
   [SerializeField]
@@ -143,14 +140,14 @@ public class Tower : MonoBehaviour, ISelectableObject
 
   public void Select()
   {
-    _isMoving = true;
+    //_isMoving = true;
     if (_spriteRenderer) _spriteRenderer.sortingOrder += 1;
     transform.SetAsLastSibling();
   }
 
   public void Deselect()
   {
-    _isMoving = false;
+    //_isMoving = false;
     if (_spriteRenderer) _spriteRenderer.sortingOrder -= 1;
   }
 
