@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -9,15 +10,17 @@ public class BuildingSystem : MonoBehaviour
   private Tower _tower;
   private Map _map;
   private bool _inBuildMode = false;
+  private Action _onExit = null;
 
   public bool IsInBuildMode() => _inBuildMode;
 
-  public void StartBuildMode(Map map, Tower tower)
+  public void EnterBuildMode(Map map, Tower tower, Action onExit = null)
   {
     _map = map;
     _tower = tower;
     tower.gameObject.SetActive(true);
     _inBuildMode = true;
+    _onExit = onExit;
     tower.SetEnable(false);
   }
 
@@ -26,6 +29,8 @@ public class BuildingSystem : MonoBehaviour
     var tower = _tower;
     _tower = null;
     _inBuildMode = false;
+    _onExit?.Invoke();
+    _onExit = null;
     return tower;
   }
 

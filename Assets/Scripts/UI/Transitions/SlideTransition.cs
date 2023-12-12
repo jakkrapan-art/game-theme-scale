@@ -12,6 +12,7 @@ public class SlideTransition : MonoBehaviour, ITransition
   [SerializeField]
   private TransitionDirection transitionDirection = TransitionDirection.Left; // Default transition direction
   private Vector2 _defaultAnchored = default;
+  private Coroutine _doingCoroutine;
 
   private void Awake()
   {
@@ -28,13 +29,19 @@ public class SlideTransition : MonoBehaviour, ITransition
   {
     _panel.gameObject.SetActive(true);
     Vector2 targetPosition = GetTargetPosition();
-    StartCoroutine(SlidePanel(targetPosition, 0.5f));
+    SlidePanel(targetPosition);
   }
 
   public void TransitionOut()
   {
     Vector2 targetPosition = GetHiddenPosition();
-    StartCoroutine(SlidePanel(targetPosition, 0.5f, () => { _panel.gameObject.SetActive(false); }));
+    SlidePanel(targetPosition, 0.15f, () => { _panel.gameObject.SetActive(false); });
+  }
+
+  private void SlidePanel(Vector2 target, float duration = 0.15f, Action callback = null)
+  {
+    if (_doingCoroutine != null) StopCoroutine(_doingCoroutine);
+    _doingCoroutine = StartCoroutine(DoSlidePanel(target, duration, callback));
   }
 
   private void HidePanel()
@@ -65,7 +72,7 @@ public class SlideTransition : MonoBehaviour, ITransition
     return _defaultAnchored;
   }
 
-  private System.Collections.IEnumerator SlidePanel(Vector2 targetPosition, float duration, Action callback = null)
+  private System.Collections.IEnumerator DoSlidePanel(Vector2 targetPosition, float duration, Action callback = null)
   {
     float elapsedTime = 0;
     Vector2 startingPosition = _panel.anchoredPosition;

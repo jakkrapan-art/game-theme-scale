@@ -46,7 +46,12 @@ public class GameController : MonoBehaviour
       {
         if(_buildingSystem)
         {
-          _buildingSystem.StartBuildMode(_map, tower);
+          _buildingSystem.EnterBuildMode(_map, tower, () => 
+          {
+            Inventory inv = _player.GetInventory();
+            if (inv == null) return;
+            inv.ShowUI();
+          });
         }
       }
     });
