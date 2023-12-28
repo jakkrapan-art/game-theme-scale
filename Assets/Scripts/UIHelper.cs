@@ -42,4 +42,12 @@ public class UIHelper : MonoBehaviour
       if (ui.TryGetComponent<UIHealth>(out var health)) callback?.Invoke(health);
     });
   }
+
+  public static void CreateWaveUI(Action<UIWaveController> callback)
+  {
+    CreateUI("UIWave", (ui) =>
+    {
+      if (ui.TryGetComponent<UIWaveController>(out var uiWave)) callback?.Invoke(uiWave);
+    });
+  }
 }

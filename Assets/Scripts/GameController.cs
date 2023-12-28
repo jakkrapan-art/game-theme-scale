@@ -86,7 +86,6 @@ public class GameController : MonoBehaviour
       spawnInterval = 1.25f,
       onWaveEnd = (wave) => 
       {
-        Debug.Log("wave " + wave + " ended.");
         if(wave != 0 && wave % 2 == 0)
         {
           _waveController.SpawnBoss();
@@ -121,7 +120,7 @@ public class GameController : MonoBehaviour
       _healthUI = ui;
     });
 
-    uiWave = FindObjectOfType<UIWaveController>();
+    /*uiWave = FindObjectOfType<UIWaveController>();
     if (uiWave)
     {
       uiWave.Setup(() =>
@@ -141,7 +140,7 @@ public class GameController : MonoBehaviour
       });
 
       uiWave.Show();
-    }
+    }*/
   }
 
   private void StartWave()
@@ -149,23 +148,6 @@ public class GameController : MonoBehaviour
     _player.GetInventory().SetActiveOpenButton(false);
     _collector.SetAllowCollect(true);
     _waveController?.SpawnEnemy();
-    //int monsterCount = Mathf.RoundToInt(_defaultWaveCount + (_wave * _waveMultiplier));
-    /*_enemySpawner.Spawn(monsterCount, 2f, () => 
-    {
-      if (_end) return;
-
-      if (_wave % 3 == 0)
-      {
-        _enemySpawner.SpawnBoss(() =>
-        {
-          EndWave();
-        });
-      }
-      else
-      {
-        EndWave();
-      }
-    });*/
   }
 
   private void EndWave()
@@ -175,7 +157,7 @@ public class GameController : MonoBehaviour
 
     var inv = _player.GetInventory();
     inv.SetActiveOpenButton(true);
-    //uiWave.Show();
+    _waveController.ShowUI();
     _collector.SetAllowCollect(false);
     Invoke(nameof(StartWave), 5);
   }

@@ -5,11 +5,14 @@ using UnityEngine;
 
 public class WaveController
 {
-  private EnemySpawner _spawner;
-  private int _baseCount;
+  private readonly EnemySpawner _spawner;
+  private readonly int _baseCount;
+  private readonly float _spawnInterval;
+  private readonly float _increaseMultiply;
+
   private int _currentWave;
-  private float _spawnInterval;
-  private float _increaseMultiply;
+
+  private UIWaveController _ui;
 
   private Action<int> _onWaveEndAction;
 
@@ -28,6 +31,30 @@ public class WaveController
     _spawnInterval = param.spawnInterval;
     _currentWave = 0;
     _onWaveEndAction = param.onWaveEnd;
+
+    CreateUI();
+  }
+
+  private void CreateUI()
+  {
+    UIHelper.CreateWaveUI((ui) =>
+    {
+      _ui = ui;
+      ui.Setup(() =>
+      {
+      });
+    });
+  }
+
+  public void ShowUI()
+  {
+    if (!_ui) return;
+    _ui.Show(_currentWave);
+  }
+
+  public void HideUI()
+  {
+    _ui?.Hide();
   }
 
   public void SpawnEnemy()

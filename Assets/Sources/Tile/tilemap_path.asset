@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: grass_a
+  m_Name: tilemap_path
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 21300000, guid: 27ac186dea6734b4aa4ec78f751359d6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0d9c88a0bd75898489178ea4cc7f1516, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
